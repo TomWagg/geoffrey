@@ -33,7 +33,7 @@ def reply_to_mentions(say, body, direct_msg=False):
                 ["where are you from"]]
     responses = ["Don't worry, I'm okay. In fact, I'm feeling positively tremendous old bean!",
                  ["You're welcome!", "My pleasure!", "Happy to help!"],
-                 [":tada::meowparty: WOOP WOOP :meowparty::tada:"],
+                 [":tada::woohoo: WOOP WOOP :woohoo::tada:"],
                  ["Oh...um, well this is awkward, but I really see you as more of a friend :grimacing:",
                   "I love you too! :heart_eyes: (Well, not really, I'm incapable of love...)",
                   "Oh uh...sorry, Geoffrey isn't here right now!",
