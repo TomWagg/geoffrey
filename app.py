@@ -169,7 +169,7 @@ def reply_recent_papers(message, direct_msg=False):
     direct_msg : `bool`, optional
         Whether the message was a direct message (and thus whether to use a thread), by default False
     """
-    queries = []
+    orcids = []
     names = []
     direct_queries = True
 
@@ -179,7 +179,7 @@ def reply_recent_papers(message, direct_msg=False):
     n_papers = 1 if len(numbers) == 0 else int(numbers[0])
 
     # if don't find any then look for users instead
-    if len(queries) == 0:
+    if len(orcids) == 0:
         direct_queries = False
         # find any tags
         tags = re.findall(r"<[^>]*>", message["text"])
@@ -197,15 +197,15 @@ def reply_recent_papers(message, direct_msg=False):
             # go through each of them
             for tag in tags:
                 # convert the tag to an query and a name
-                query, first_name, last_name = get_orcid_from_id(tag.replace("<@", "").replace(">", ""))
+                orcid, first_name, last_name = get_orcid_from_id(tag.replace("<@", "").replace(">", ""))
                 print("ADS query for:", query, first_name, last_name)
 
                 # append info
-                queries.append(query)
+                orcids.append(orcid)
                 names.append(first_name + " " + last_name)
 
     # if we found no queries through all of that then crash out with a message
-    if len(queries) == 0:
+    if len(orcids) == 0:
         app.client.chat_postMessage(text=(f"{insert_british_consternation()} I think you asked for some "
                                           "recent papers but I couldn't find any ADS queries or user tags in "
                                           "the message sorry :pleading_face:"),
@@ -213,18 +213,19 @@ def reply_recent_papers(message, direct_msg=False):
         return
 
     # go through each orcid
-    for i in range(len(queries)):
-        if queries[i] is None:
+    for i in range(len(orcids)):
+        if orcids[i] is None:
             app.client.chat_postMessage(text=(f"{insert_british_consternation()} I'm terribly sorry old chap "
                                               "but I couldn't find an ORCID for this user :thinking-face:"),
                                         channel=message["channel"], thread_ts=thread_ts)
             continue
 
         # get the most recent n papers
-        papers = get_ads_papers(query=queries[i])
+        query = f'orcid:{orcids[i]}'
+        papers = get_ads_papers(query=query)
         if papers is None:
             app.client.chat_postMessage(text=("Terribly sorry old chap but it seems that there's a problem "
-                                              f"with that ADS query ({queries[i]}) :thinking-face:. Check you"
+                                              f"with that ADS query ({query}) :thinking-face:. Check you"
                                               "  don't have a typo of some sort!"),
                                         channel=message["channel"], thread_ts=thread_ts)
             return
@@ -240,7 +241,7 @@ def reply_recent_papers(message, direct_msg=False):
             paper = papers[0]
 
             # create a brief message for before the paper
-            preface = f"Here's the most recent paper for this query: {queries[i]}"
+            preface = f"Here's the most recent paper for this query: {query}"
             authors = f"_Authors: {paper['authors']}_"
 
             # if you supplied tags (so we know their name)
@@ -316,7 +317,7 @@ def reply_recent_papers(message, direct_msg=False):
             blocks = list(np.ravel(blocks))
 
             # same preface stuff as above but with many papers
-            preface = (f"Here's the {n_papers} most recent papers for the query: {queries[i]}")
+            preface = (f"Here's the {n_papers} most recent papers for the query: {query}")
 
             # if you supplied tags (so we know their name)
             if not direct_queries:
