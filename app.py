@@ -14,23 +14,12 @@ app = App(token=os.environ.get("GEOFFREY_BOT_TOKEN"))
 GERALD_ID = "U03SY9R6D5X"
 PAPERS_CHANNEL = "geoffrey-testing"
 
-
-""" ---------- MESSAGE DETECTIONS ---------- """
-
-def msg_action_trigger(message, triggers, callback, case_sensitive=False):
-    triggers = np.atleast_1d(triggers)
-    text = message["text"] if case_sensitive else message["text"].lower()
-
-    for trigger in triggers:
-        if text.find(trigger) >= 0:
-            callback(message)
-
 """ ---------- APP MENTIONS ---------- """
 
 
 @app.event("app_mention")
 def reply_to_mentions(say, body, direct_msg=False):
-
+    print("Detected a mention!")
     print(get_query_name_from_user_id("tomwagg"))
 
     message = body["event"]
