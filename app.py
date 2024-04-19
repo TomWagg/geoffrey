@@ -539,9 +539,13 @@ def save_all_user_ids():
     """Save all user IDs to a file for future reference"""
     users = app.client.users_list()["members"]
 
-    real_names = [user["real_name"] for user in users]
-    usernames = [user["name"] for user in users]
-    ids = [user["id"] for user in users]
+    real_names, usernames, ids = [], [], []
+    for user in users:
+        if "real_name" in user and "name" in user and "id" in user:
+            real_names.append(user["real_name"])
+            usernames.append(user["name"])
+            ids.append(user["id"])
+
     df = pd.DataFrame({"username": usernames, "id": ids, "real_name": real_names})
     df.to_csv("data/user_ids.csv", index=False)
 
