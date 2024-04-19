@@ -360,7 +360,8 @@ def get_orcid_from_id(user_id):
     if len(matching_ids) == 0:
         return None, None, None
     else:
-        return matching_ids["orcid"].values[0], matching_ids["first"].values[0], matching_ids["last"].values[0]
+        return matching_ids["orcid"].values[0], matching_ids["first_name"].values[0],\
+            matching_ids["last_name"].values[0]
 
 
 
