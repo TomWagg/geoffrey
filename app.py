@@ -201,7 +201,7 @@ def reply_recent_papers(message, direct_msg=False):
             # go through each of them
             for tag in tags:
                 # convert the tag to an query and a name
-                query, name = get_query_name_from_user_id(tag.replace("<@", "").replace(">", ""))
+                query, name = get_orcid_from_id(tag.replace("<@", "").replace(">", ""))
                 print("ADS query for:", query, name)
 
                 # append info
