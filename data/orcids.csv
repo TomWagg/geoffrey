@@ -1,2 +1,47 @@
-orcid,name,username,role
-0000-0001-6147-5761,Tom Wagg,tomwagg,Graduate Student
+orcid,first_name,last_name,username,role
+0000-0002-0802-9145,Eric,Agol,agol,Professor
+0000-0002-6404-9562,Scott,Anderson,sfander,Professor
+0000-0001-6487-5445,Rory,Barnes,rkb9,Associate Professor
+0000-0001-8018-5348,Eric,Bellm,ecbellm,Research Associate Professor
+0000-0001-5576-8189,Andy,Connolly,ajc,Professor
+0000-0002-0637-835X,James,Davenport,jrad,Research Assistant Professor
+0000-0003-1996-9252,Mario,Juric,mjuric,Professor
+0000-0003-2184-1581,Emily,Levesque,emsque,Associate Professor
+0000-0001-7961-9735,Matt,McQuinn,mcquinn,Associate Professor
+0000-0002-1386-1710,Vikki,Meadows,meadows,Professor
+0000-0001-5510-2803,Tom,Quinn,trq,Professor
+0000-0003-2486-3858,Jose,Sanchez Gallego,gallegoj,Research Assistant Professor
+0000-0002-7327-565X,Sarah,Tuttle,tuttlese,Associate Professor
+0000-0002-7502-0597,Ben,Williams,benw1,Research Associate Professor
+0000-0003-4373-7777,Paula,Szkody,szkody,Professor Emeritus
+0000-0003-3287-5250,Neven,Caplar,ncaplar,Research Scientist
+0000-0001-7335-1715,Colin,Chandler,coc123,Postdoc
+0000-0002-1264-2006,Julianne,Dalcanton,jd,Professor Emeritus
+0000-0002-2525-9647,Aritra,Ghosh,aritrag,Postdoc
+0000-0003-2599-7524,Adam,Smercina,asmerci,Postdoc
+0000-0003-0743-9422,Pedro,Bernadelli,phbern,Postdoc
+0000-0003-3520-6503,Yakov,Faerman,yakov.faerman,Acting Instructor
+0000-0002-0355-0134,Jess,Werk,jwerk,Professor
+0000-0001-5250-2633,Zeljko,Ivezic,ivezic,Professor
+0000-0002-7961-6881,Jessica,Birky,jbirky,Graduate Student
+0000-0002-9040-672X,Bonni,Choi,bechoi,Graduate Student
+0000-0003-3429-4142,Miles,Currie,mcurr,Graduate Student
+0000-0002-8928-3929,Hector Emanuel Delgado,Diaz,hdelgad9,Graduate Student
+0000-0003-4521-2421,Sam,Garza,samgarza,Graduate Student
+0000-0002-4061-3827,Bethlee M.,Lindor,blindor,Graduate Student
+0000-0001-5820-3925,Joachim,Moeyens,moeyensj,Graduate Student
+0000-0002-7712-6678,Steven,Stetzler,stevengs,Graduate Student
+0000-0003-4471-1042,Gabrielle,Suissa,suissa,Graduate Student
+0000-0001-5455-6678,Lupita,Tovar,lupita_tovar,Graduate Student
+0000-0002-6440-1087,Debby,Tran,detran,Graduate Student
+0000-0003-0484-3331,Andy,Tzanidakis,atzanida667,Graduate Student
+0000-0001-6147-5761,Tom,Wagg,tomwagg,Graduate Student
+0000-0001-5538-0395,David,Wang,ykwang,Graduate Student
+0000-0001-6320-2230,Tobin,Wainer,tobinw,Graduate Student
+0000-0002-2495-3514,John Franklin,Crenshaw,jfc20,Graduate Student
+0000-0002-0604-5440,Lauryn,Williams,laurynwi,Graduate Student
+0000-0003-4285-4453,Chester,Li,zhuofu,Graduate Student
+0009-0009-9700-1811,Binh,Nguyen,ngbinh,Graduate Student
+0000-0002-8766-6627,Hurum Maksora,Tohfa,htohfa,Graduate Student
+0009-0002-4643-1845,Oge,Okoronkwo,ogeoko,Graduate Student
+0000-0002-6307-7932,Pip,Petersen,speter7,Graduate Student
