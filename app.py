@@ -4,6 +4,7 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 import re
 import numpy as np
 import datetime
+import pandas as pd
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -20,7 +21,7 @@ PAPERS_CHANNEL = "geoffrey-testing"
 @app.event("app_mention")
 def reply_to_mentions(say, body, direct_msg=False):
     print("Detected a mention!")
-    print(get_query_name_from_user_id("tomwagg"))
+    print(get_orcid_from_id("tomwagg"))
 
     message = body["event"]
     # reply to mentions with specific messages
@@ -326,8 +327,8 @@ def reply_recent_papers(message, direct_msg=False):
                                         channel=message["channel"], thread_ts=thread_ts, unfurl_links=False)
 
 
-def get_query_name_from_user_id(user_id):
-    """Convert a user ID to an ADS query and name
+def get_orcid_from_id(user_id):
+    """Convert a user ID to an orcid ID
 
     Parameters
     ----------
@@ -344,7 +345,6 @@ def get_query_name_from_user_id(user_id):
     """
     # get the full list of slack users
     users = app.client.users_list()["members"]
-    print(users[0])
 
     # find the matching username for the ID
     search_username = None
@@ -353,27 +353,14 @@ def get_query_name_from_user_id(user_id):
             search_username = user["name"]
             break
 
-    # go through the grad info file
-    with open("private_data/grad_info.csv") as grad_file:
-        for grad in grad_file:
-            if grad[0] == "#":
-                continue
-            name, username, _, _, orcid, ads = grad.rstrip().split("|")
+    # find matching orcid ID
+    orcids = pd.read_csv("data/orcids.csv")
+    matching_ids = orcids[orcids["username"] == search_username]
+    if len(matching_ids) == 0:
+        return None, None
+    else:
+        return matching_ids["orcid"].values[0], matching_ids["name"].values[0]
 
-            # find the matching username and return the info (if it exists)
-            if username == search_username:
-                if ads == "-":
-                    if orcid != "-":
-                        query = f'orcid:{orcid}'
-                    else:
-                        split_name = name.split(" ")
-                        query = f'author:"{split_name[-1]}, {split_name[0][0]}"'
-                    return query, name
-                else:
-                    return ads.rstrip(), name
-
-    # return None if can't find them in the table
-    return None, None
 
 
 def any_new_publications():
