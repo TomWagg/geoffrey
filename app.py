@@ -22,6 +22,7 @@ PAPERS_CHANNEL = "geoffrey-testing"
 def reply_to_mentions(say, body, direct_msg=False):
     print("Detected a mention!")
     print(get_orcid_from_id("tomwagg"))
+    save_all_user_ids()
 
     message = body["event"]
     # reply to mentions with specific messages
@@ -161,7 +162,6 @@ def mention_trigger(message, triggers, response, thread_ts=None, ch_id=None, cas
 
 
 """ ---------- PUBLICATION ANNOUNCEMENTS ---------- """
-
 
 def reply_recent_papers(message, direct_msg=False):
     """Reply to a message with the most recent papers associated with a particular user
@@ -534,6 +534,17 @@ def announce_publication(user_id, name, papers):
 
 
 """ ---------- HELPER FUNCTIONS ---------- """
+
+def save_all_user_ids():
+    """Save all user IDs to a file for future reference"""
+    users = app.client.users_list()["members"]
+
+    real_names = [user["real_name"] for user in users]
+    usernames = [user["name"] for user in users]
+    ids = [user["id"] for user in users]
+    df = pd.DataFrame({"username": usernames, "id": ids, "real_name": real_names})
+    df.to_csv("data/user_ids.csv", index=False)
+
 
 def insert_british_consternation():
     choices = ["Oh fiddlesticks!", "Ah burnt crumpets!", "Oops, I've bangers and mashed it!",
