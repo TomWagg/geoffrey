@@ -404,7 +404,7 @@ def any_new_publications():
                 print(f"CAN'T FIND USER ID FOR {row['username']}")
                 continue
             user_id = matching_usernames["id"].values[0]
-            announce_publication(user_id, row['first'] + ' ' + row["last"], weekly_papers)
+            announce_publication(user_id, row['first_name'] + ' ' + row["last_name"], weekly_papers)
 
     if no_new_papers:
         print("No new papers!")
