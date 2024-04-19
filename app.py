@@ -198,7 +198,7 @@ def reply_recent_papers(message, direct_msg=False):
             for tag in tags:
                 # convert the tag to an query and a name
                 orcid, first_name, last_name = get_orcid_from_id(tag.replace("<@", "").replace(">", ""))
-                print("ADS query for:", query, first_name, last_name)
+                print("ADS details:", orcid, first_name, last_name)
 
                 # append info
                 orcids.append(orcid)
