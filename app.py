@@ -197,12 +197,12 @@ def reply_recent_papers(message, direct_msg=False):
             # go through each of them
             for tag in tags:
                 # convert the tag to an query and a name
-                query, name = get_orcid_from_id(tag.replace("<@", "").replace(">", ""))
-                print("ADS query for:", query, name)
+                query, first_name, last_name = get_orcid_from_id(tag.replace("<@", "").replace(">", ""))
+                print("ADS query for:", query, first_name, last_name)
 
                 # append info
                 queries.append(query)
-                names.append(name)
+                names.append(first_name + " " + last_name)
 
     # if we found no queries through all of that then crash out with a message
     if len(queries) == 0:
@@ -214,12 +214,18 @@ def reply_recent_papers(message, direct_msg=False):
 
     # go through each orcid
     for i in range(len(queries)):
+        if queries[i] is None:
+            app.client.chat_postMessage(text=(f"{insert_british_consternation()} I'm terribly sorry old chap "
+                                              "but I couldn't find an ORCID for this user :thinking-face:"),
+                                        channel=message["channel"], thread_ts=thread_ts)
+            continue
+
         # get the most recent n papers
         papers = get_ads_papers(query=queries[i])
         if papers is None:
             app.client.chat_postMessage(text=("Terribly sorry old chap but it seems that there's a problem "
-                                              f"with that ADS query ({queries[i]}) :hmmmmm:. Check you don't"
-                                              " have a typo of some sort!"),
+                                              f"with that ADS query ({queries[i]}) :thinking-face:. Check you"
+                                              "  don't have a typo of some sort!"),
                                         channel=message["channel"], thread_ts=thread_ts)
             return
         if len(papers) == 0:
@@ -339,23 +345,22 @@ def get_orcid_from_id(user_id):
     name : `str`
         Person's full name
     """
-    # get the full list of slack users
-    users = app.client.users_list()["members"]
-
-    # find the matching username for the ID
     search_username = None
-    for user in users:
-        if user["id"] == user_id:
-            search_username = user["name"]
-            break
+
+    id_table = pd.read_csv("data/user_ids.csv")
+    matching_ids = id_table[id_table["id"] == user_id]
+    if len(matching_ids) == 0:
+        return None, None, None
+    else:
+        search_username = matching_ids["username"].values[0]
 
     # find matching orcid ID
     orcids = pd.read_csv("data/orcids.csv")
     matching_ids = orcids[orcids["username"] == search_username]
     if len(matching_ids) == 0:
-        return None, None
+        return None, None, None
     else:
-        return matching_ids["orcid"].values[0], matching_ids["name"].values[0]
+        return matching_ids["orcid"].values[0], matching_ids["first"].values[0], matching_ids["last"].values[0]
 
 
 
@@ -366,54 +371,38 @@ def any_new_publications():
     initial_announcement = False
 
     # find the user ID of the person
-    users = app.client.users_list()["members"]
+    id_table = pd.read_csv("data/user_ids.csv")
 
     # go through the file of grads
-    with open("private_data/grad_info.csv") as grad_file:
-        for grad in grad_file:
-            # skip any comments
-            if grad[0] == "#":
+    orcid_file = pd.read_csv("data/orcids.csv")
+    for i, row in orcid_file.iterrows():
+        query = f'orcid:{row["orcid"]}'
+
+        # get the papers from the last week
+        weekly_papers = get_ads_papers(query, past_week=True)
+
+        # skip anyone who has a bad query
+        if weekly_papers is None:
+            continue
+
+        # if this person has one then announce it!
+        if len(weekly_papers) > 0:
+            no_new_papers = False
+
+            # if Gerald hasn't announced that he's looking at papers yet
+            if not initial_announcement:
+                # send an announcement and remember to not do that next time
+                app.client.chat_postMessage(text=("It's time for our weekly paper round up, let's see "
+                                                    "what everyone's been publishing in this last week!"),
+                                            channel=find_channel(PAPERS_CHANNEL))
+                initial_announcement = True
+
+            matching_usernames = id_table[id_table["username"] == row["username"]]
+            if len(matching_usernames) == 0:
+                print(f"CAN'T FIND USER ID FOR {row['username']}")
                 continue
-
-            name, username, _, _, orcid, query = grad.rstrip().split("|")
-
-            # default to a simple orcid/name query depending on what is available
-            if query == "-":
-                if orcid != "-":
-                    query = f'orcid:{orcid}'
-                else:
-                    split_name = name.split(" ")
-                    query = f'author:"{split_name[-1]}, {split_name[0][0]}"'
-
-            # get the papers from the last week
-            weekly_papers = get_ads_papers(query, past_week=True)
-
-            # skip anyone who has a bad query
-            if weekly_papers is None:
-                continue
-
-            # if this person has one then announce it!
-            if len(weekly_papers) > 0:
-                no_new_papers = False
-
-                # if Gerald hasn't announced that he's looking at papers yet
-                if not initial_announcement:
-                    # send an announcement and remember to not do that next time
-                    app.client.chat_postMessage(text=("It's time for our weekly paper round up, let's see "
-                                                      "what everyone's been publishing in this last week!"),
-                                                channel=find_channel(PAPERS_CHANNEL))
-                    initial_announcement = True
-
-                user_id = None
-                for user in users:
-                    if user["name"] == username:
-                        user_id = user["id"]
-                        break
-
-                if user_id is None:
-                    print(f"CAN'T FIND USER ID FOR {username}")
-                    continue
-                announce_publication(user_id, name, weekly_papers)
+            user_id = matching_usernames["id"].values[0]
+            announce_publication(user_id, row['first'] + ' ' + row["last"], weekly_papers)
 
     if no_new_papers:
         print("No new papers!")
@@ -600,6 +589,7 @@ def custom_strftime(format, t):
 
 def every_morning():
     """ This function runs every morning around 9AM """
+    save_all_user_ids()
     today = datetime.datetime.now()
     the_day = today.strftime("%A")
 
