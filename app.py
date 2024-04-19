@@ -12,7 +12,7 @@ from ads_query import bold_grad_author, get_ads_papers
 
 # Initializes your app with your bot token and socket mode handler
 app = App(token=os.environ.get("GEOFFREY_BOT_TOKEN"))
-GERALD_ID = "U03SY9R6D5X"
+BOT_ID = "U06V23JH71R"
 PAPERS_CHANNEL = "geoffrey-testing"
 
 """ ---------- APP MENTIONS ---------- """
@@ -20,10 +20,6 @@ PAPERS_CHANNEL = "geoffrey-testing"
 
 @app.event("app_mention")
 def reply_to_mentions(say, body, direct_msg=False):
-    print("Detected a mention!")
-    print(get_orcid_from_id("tomwagg"))
-    save_all_user_ids()
-
     message = body["event"]
     # reply to mentions with specific messages
 
@@ -76,7 +72,7 @@ def reply_to_mentions(say, body, direct_msg=False):
     # send a catch-all message if nothing matches
     thread_ts = None if direct_msg else body["event"]["ts"]
     say(text=(f"{insert_british_consternation()} Okay, good news: I heard you. Bad news: I'm not a very "
-              "smart bot so I don't know what you want from me :shrug::baby::gerald-deceased:"),
+              "smart bot so I don't know what you want from me :shrug::baby:"),
         thread_ts=thread_ts, channel=body["event"]["channel"])
 
 
@@ -188,9 +184,9 @@ def reply_recent_papers(message, direct_msg=False):
         # find any tags
         tags = re.findall(r"<[^>]*>", message["text"])
 
-        # remove Gerald from the tags
-        if f"<@{GERALD_ID}>" in tags:
-            tags.remove(f"<@{GERALD_ID}>")
+        # remove bot from the tags
+        if f"<@{BOT_ID}>" in tags:
+            tags.remove(f"<@{BOT_ID}>")
 
         # let people say "my" paper
         if len(tags) == 0 and message["text"].find("my") >= 0:
@@ -228,7 +224,7 @@ def reply_recent_papers(message, direct_msg=False):
             return
         if len(papers) == 0:
             app.client.chat_postMessage(text=("Sorry but I couldn't find any papers for this query!"
-                                              ":gerald-search::gerald-confused: If you think there should be"
+                                              "If you think there should be"
                                               " some results then make sure you don't have a typo!"),
                                         channel=message["channel"], thread_ts=thread_ts)
             return
@@ -442,12 +438,12 @@ def announce_publication(user_id, name, papers):
 
     # if it's just one then write some messages to them
     if len(papers) == 1:
-        preface = f"Look what I found! :gerald-search::tada: {adjective} work <@{user_id}> :clap:"
+        preface = f"Look what I found! :tada: {adjective} work <@{user_id}> :clap:"
         outro = ("I put the abstract in the thread for anyone interested in learning more "
                  f"- again, a big congratulations to <@{user_id}> for this awesome paper")
     else:
         # edit the messages if there is more than one paper
-        preface = (f"Look what I found! :gerald-search::tada: Not 1 but {len(papers)} new papers "
+        preface = (f"Look what I found! :tada: Not 1 but {len(papers)} new papers "
                    f"from <@{user_id}>!! :clap::scream:")
         outro = ("I put the abstracts in the thread for anyone interested in learning more "
                  f"- again, a big congratulations to <@{user_id}> for these awesome papers")
