@@ -429,7 +429,7 @@ def announce_publication(user_id, name, papers):
 
     # if it's just one then write some messages to them
     if len(papers) == 1:
-        preface = f"Look what I found! :tada: {adjective} work <@{user_id}> :clap:"
+        preface = f"Look what I found! :tada: {adjective} work :clap:"
         outro = ("I put the abstract in the thread for anyone interested in learning more "
                  f"- again, a big congratulations to <@{user_id}> for this awesome paper")
     else:
@@ -445,7 +445,7 @@ def announce_publication(user_id, name, papers):
             "type": "header",
             "text": {
                 "type": "plain_text",
-                "text": ":rotating_light: New grad paper alert!! :rotating_light:",
+                "text": f":rotating_light: New paper alert for <@{user_id}> !! :rotating_light:",
                 "emoji": True
             }
         },
