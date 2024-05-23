@@ -10,7 +10,7 @@ orcid,first_name,last_name,username,role
 0000-0001-7961-9735,Matt,McQuinn,mcquinn,Associate Professor
 0000-0002-1386-1710,Vikki,Meadows,meadows,Professor
 0000-0001-5510-2803,Tom,Quinn,trq,Professor
-0000-0003-2486-3858,Jose,Sanchez Gallego,gallegoj,Research Assistant Professor
+0000-0003-2486-3858,Jose,Sanchez-Gallego,gallegoj,Research Assistant Professor
 0000-0002-7327-565X,Sarah,Tuttle,tuttlese,Associate Professor
 0000-0002-7502-0597,Ben,Williams,benw1,Research Associate Professor
 0000-0003-4373-7777,Paula,Szkody,szkody,Professor Emeritus
@@ -19,7 +19,7 @@ orcid,first_name,last_name,username,role
 0000-0002-1264-2006,Julianne,Dalcanton,jd,Professor Emeritus
 0000-0002-2525-9647,Aritra,Ghosh,aritrag,Postdoc
 0000-0003-2599-7524,Adam,Smercina,asmerci,Postdoc
-0000-0003-0743-9422,Pedro,Bernadelli,phbern,Postdoc
+0000-0003-0743-9422,Pedro,Bernardinelli,phbern,Postdoc
 0000-0003-3520-6503,Yakov,Faerman,yakov.faerman,Acting Instructor
 0000-0002-0355-0134,Jess,Werk,jwerk,Professor
 0000-0001-5250-2633,Zeljko,Ivezic,ivezic,Professor
