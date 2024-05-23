@@ -2,7 +2,8 @@ import ads
 import datetime
 import pandas as pd
 import numpy as np
-
+from unidecode import unidecode
+from collections import defaultdict
 
 def get_ads_papers(query, astronomy_collection=True, past_week=False, allowed_types=["article", "eprint"],
                    remove_known_papers=False):
@@ -81,8 +82,9 @@ def check_uw_authors(paper, uw_authors):
             continue
         last, first = author.split(", ")
         initial = first[0].lower()
+        last = unidecode(last).lower()
 
-        if last in uw_authors and initial == uw_authors[last]:
+        if last in uw_authors and initial in uw_authors[last]:
             if i == 0:
                 first_author = True
             total_uw += 1
@@ -109,7 +111,13 @@ def save_papers(papers_dict_list):
     """
     # read in the UW authors
     uw_authors_table = pd.read_csv("data/orcids.csv")
-    uw_authors = {row['last_name']: row['first_name'][0].lower() for _, row in uw_authors_table.iterrows()}
+    uw_authors = defaultdict(list)
+    for _, row in uw_authors_table.iterrows():
+        uw_authors[row['last_name'].lower()].append(row['first_name'][0].lower())
+
+    # HACK: add David and Chester's alternate names
+    uw_authors["wang"].append("y")
+    uw_authors["li"].append("z")
 
     # create a dictionary of the data    
     df_dict = {key: [i[key] for i in papers_dict_list]
