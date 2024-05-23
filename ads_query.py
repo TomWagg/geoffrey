@@ -77,7 +77,7 @@ def check_uw_authors(paper, uw_authors):
     """
     first_author, total_uw = False, 0
     for i, author in enumerate(paper['authors']):
-        if ',' not in author:
+        if author.count(",") != 1:
             continue
         last, first = author.split(", ")
         initial = first[0].lower()
