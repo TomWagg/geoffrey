@@ -1,5 +1,7 @@
 import ads
 import datetime
+import pandas as pd
+import numpy as np
 
 
 def get_ads_papers(query, astronomy_collection=True, past_week=False, allowed_types=["article", "eprint"]):
@@ -32,7 +34,7 @@ def get_ads_papers(query, astronomy_collection=True, past_week=False, allowed_ty
     # get the papers
     papers = ads.SearchQuery(q=query, sort="date", fl=["abstract", "author", "citation_count", "doctype",
                                                        "first_author", "read_count", "title", "bibcode",
-                                                       "pubdate"])
+                                                       "pubdate", "keyword", 'pub'])
 
     papers_dict_list = []
 
@@ -47,8 +49,86 @@ def get_ads_papers(query, astronomy_collection=True, past_week=False, allowed_ty
                 "date": datetime.date(year=year, month=month, day=1),
                 "citations": paper.citation_count,
                 "reads": paper.read_count,
+                "keywords": paper.keyword,
+                "publisher": paper.pub
             })
     return papers_dict_list
+
+
+def check_uw_authors(paper, uw_authors):
+    """Check if the authors of a paper are from UW
+
+    Parameters
+    ----------
+    paper : `dict`
+        Dictionary of paper information
+    uw_authors : `dict`
+        Dictionary of UW authors with last name as key and first initial as value
+
+    Returns
+    -------
+    first_author : `bool`
+        Whether the first author is from UW
+    total_uw : `int`
+        Total number of UW authors
+    """
+    first_author, total_uw = False, 0
+    for i, author in enumerate(paper['authors']):
+        if ',' not in author:
+            continue
+        last, first = author.split(", ")
+        initial = first[0].lower()
+
+        if last in uw_authors and initial == uw_authors[last]:
+            if i == 0:
+                first_author = True
+            total_uw += 1
+    return first_author, total_uw
+
+
+def filter_known_papers(papers_dict_list):
+    papers = pd.read_csv("data/papers.csv")
+    known_papers = papers['title'].values
+    new_papers = []
+    for paper in papers_dict_list:
+        if paper['title'] not in known_papers:
+            new_papers.append(paper)
+    return new_papers
+
+
+def save_papers(papers_dict_list):
+    """Save papers to a CSV file
+
+    Parameters
+    ----------
+    papers_dict_list : `list`
+        List of dictionaries of paper information
+    """
+    # read in the UW authors
+    uw_authors_table = pd.read_csv("data/orcids.csv")
+    uw_authors = {row['last_name']: row['first_name'][0].lower() for _, row in uw_authors_table.iterrows()}
+
+    # create a dictionary of the data    
+    df_dict = {key: [i[key] for i in papers_dict_list]
+               for key in ['title','authors','date','publisher','keywords','link','citations','abstract']}
+
+    # initialize the first author and total UW authors
+    first_author = np.repeat(False, len(papers_dict_list))
+    total_uw = np.zeros(len(papers_dict_list)).astype(int)
+
+    # go through each paper and check UW authors
+    for i, paper in enumerate(papers_dict_list):
+        first_author[i], total_uw[i] = check_uw_authors(paper, uw_authors)
+
+    # add the first author and total UW authors to the dictionary
+    df_dict['first_author'] = first_author
+    df_dict['total_uw'] = total_uw
+
+    # read in the current papers and add the new ones
+    df = pd.read_csv("data/papers.csv")
+    new_df = pd.DataFrame(df_dict)
+    df = pd.concat([df,new_df])
+    df.to_csv("data/papers.csv", index=False)
 
 
 def bold_grad_author(author_string, name):
