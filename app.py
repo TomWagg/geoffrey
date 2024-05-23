@@ -8,7 +8,7 @@ import pandas as pd
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from ads_query import bold_grad_author, get_ads_papers
+from ads_query import bold_grad_author, get_ads_papers, save_papers
 
 # Initializes your app with your bot token and socket mode handler
 app = App(token=os.environ.get("GEOFFREY_BOT_TOKEN"))
@@ -381,7 +381,7 @@ def any_new_publications():
         query = f'orcid:{row["orcid"]}'
 
         # get the papers from the last week
-        weekly_papers = get_ads_papers(query, past_week=True)
+        weekly_papers = get_ads_papers(query, past_week=True, remove_known_papers=True)
 
         # skip anyone who has a bad query
         if weekly_papers is None:
@@ -389,6 +389,7 @@ def any_new_publications():
 
         # if this person has one then announce it!
         if len(weekly_papers) > 0:
+            save_papers(weekly_papers)
             no_new_papers = False
 
             # if Gerald hasn't announced that he's looking at papers yet
