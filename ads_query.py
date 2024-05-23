@@ -4,7 +4,8 @@ import pandas as pd
 import numpy as np
 
 
-def get_ads_papers(query, astronomy_collection=True, past_week=False, allowed_types=["article", "eprint"]):
+def get_ads_papers(query, astronomy_collection=True, past_week=False, allowed_types=["article", "eprint"],
+                   remove_known_papers=False):
     """Get papers from NASA/ADS based on a query
 
     Parameters
@@ -52,6 +53,8 @@ def get_ads_papers(query, astronomy_collection=True, past_week=False, allowed_ty
                 "keywords": paper.keyword,
                 "publisher": paper.pub
             })
+    if remove_known_papers:
+        papers_dict_list = filter_known_papers(papers_dict_list)
     return papers_dict_list
 
 
