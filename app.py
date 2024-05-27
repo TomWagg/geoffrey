@@ -77,7 +77,7 @@ def reply_to_mentions(say, body, direct_msg=False):
 
 
 def mention_action(message, regex, action, case_sensitive=False, pass_message=True, direct_msg=False):
-    """Perform an action based on a message that mentions Gerald if it matches a regular expression
+    """Perform an action based on a message that mentions Geoffrey if it matches a regular expression
 
     Parameters
     ----------
@@ -392,7 +392,7 @@ def any_new_publications():
             save_papers(weekly_papers)
             no_new_papers = False
 
-            # if Gerald hasn't announced that he's looking at papers yet
+            # if Geoffrey hasn't announced that he's looking at papers yet
             if not initial_announcement:
                 # send an announcement and remember to not do that next time
                 app.client.chat_postMessage(text=("It's time for our weekly paper round up, let's see "
@@ -600,7 +600,7 @@ def every_morning():
         any_new_publications()
 
 
-# start Gerald
+# start Geoffrey
 if __name__ == "__main__":
     scheduler = BackgroundScheduler({'apscheduler.timezone': 'US/Pacific'})
     scheduler.add_job(every_morning, "cron", hour=9, minute=32)
