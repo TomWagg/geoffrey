@@ -17,8 +17,8 @@ PAPERS_CHANNEL = "geoffrey-testing"
 
 """ ---------- APP MENTIONS ---------- """
 
-
-@app.event("app_mention")
+app.event("app_mention")
+@app.event("message")
 def reply_to_mentions(say, body, direct_msg=False):
     message = body["event"]
     # reply to mentions with specific messages
