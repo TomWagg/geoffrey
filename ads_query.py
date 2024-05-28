@@ -164,6 +164,9 @@ def bold_uw_authors(author_string, uw_authors=None):
     """
     authors = "_Authors: "
 
+    if uw_authors is None:
+        uw_authors = get_uw_authors()
+
     # go through each author in the list
     for author in author_string:
         split_author = list(reversed(author.split(", ")))
