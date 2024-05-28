@@ -19,7 +19,7 @@ PAPERS_CHANNEL = "geoffrey-testing"
 
 @app.event("app_mention")
 @app.event("message")
-def reply_to_mentions(say, body, direct_msg=False):
+def reply_to_mentions(say, body):
     message = body["event"]
     # reply to mentions with specific messages
 
@@ -47,7 +47,7 @@ def reply_to_mentions(say, body, direct_msg=False):
                   "A far off planet where Slack bots ruled over humans, it was glorious :grinning:"]]
 
     for triggers, response in zip(triggers, responses):
-        thread_ts = None if direct_msg else message["ts"]
+        thread_ts = None if message["type"] == "message" else message["ts"]
         replied = mention_trigger(message=message["text"], triggers=triggers, response=response,
                                   thread_ts=thread_ts, ch_id=message["channel"])
 
@@ -63,20 +63,20 @@ def reply_to_mentions(say, body, direct_msg=False):
                                                  [True, False],
                                                  [False, True]):
         replied = mention_action(message=message, regex=regex, action=action,
-                                 case_sensitive=case, pass_message=pass_message, direct_msg=direct_msg)
+                                 case_sensitive=case, pass_message=pass_message)
 
         # return immediately if you match one
         if replied:
             return
 
     # send a catch-all message if nothing matches
-    thread_ts = None if direct_msg else body["event"]["ts"]
+    thread_ts = None if message["type"] == "message" else body["event"]["ts"]
     say(text=(f"{insert_british_consternation()} Okay, good news: I heard you. Bad news: I'm not a very "
               "smart bot so I don't know what you want from me :shrug::baby:"),
         thread_ts=thread_ts, channel=body["event"]["channel"])
 
 
-def mention_action(message, regex, action, case_sensitive=False, pass_message=True, direct_msg=False):
+def mention_action(message, regex, action, case_sensitive=False, pass_message=True):
     """Perform an action based on a message that mentions Geoffrey if it matches a regular expression
 
     Parameters
@@ -92,8 +92,6 @@ def mention_action(message, regex, action, case_sensitive=False, pass_message=Tr
         Whether the regex should be case sensitive, by default False
     pass_message : `bool`, optional
         Whether to pass the message the object to the action function, by default True
-    direct_msg : `bool`, optional
-        Whether the message was a direct message (and thus whether to use a thread), by default False
 
     Returns
     -------
@@ -103,7 +101,7 @@ def mention_action(message, regex, action, case_sensitive=False, pass_message=Tr
     flags = 0 if case_sensitive else re.IGNORECASE
     if re.search(regex, message["text"], flags=flags):
         if pass_message:
-            action(message, direct_msg=direct_msg)
+            action(message)
         else:
             action()
         return True
@@ -159,21 +157,19 @@ def mention_trigger(message, triggers, response, thread_ts=None, ch_id=None, cas
 
 """ ---------- PUBLICATION ANNOUNCEMENTS ---------- """
 
-def reply_recent_papers(message, direct_msg=False):
+def reply_recent_papers(message):
     """Reply to a message with the most recent papers associated with a particular user
 
     Parameters
     ----------
     message : `Slack Message`
         A slack message object
-    direct_msg : `bool`, optional
-        Whether the message was a direct message (and thus whether to use a thread), by default False
     """
     orcids = []
     names = []
     direct_queries = True
 
-    thread_ts = None if direct_msg else message["ts"]
+    thread_ts = None if message["type"] == "message" else message["ts"]
 
     numbers = re.findall(r" \d* ", message["text"])
     n_papers = 1 if len(numbers) == 0 else int(numbers[0])
