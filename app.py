@@ -405,13 +405,15 @@ def any_new_publications():
                 print(f"CAN'T FIND USER ID FOR {row['username']}")
                 continue
             user_id = matching_usernames["id"].values[0]
-            announce_publication(user_id, row['first_name'] + ' ' + row["last_name"], weekly_papers)
+
+            for paper in weekly_papers:
+                announce_publication(user_id, row['first_name'] + ' ' + row["last_name"], paper)
 
     if no_new_papers:
         print("No new papers!")
 
 
-def announce_publication(user_id, name, papers):
+def announce_publication(user_id, name, paper):
     """Announce to the workspace that someone has published a new paper(s)
 
     Parameters
@@ -420,25 +422,17 @@ def announce_publication(user_id, name, papers):
         Slack user ID of the person
     name : `str`
         Plain name of the person
-    papers : `list` of `dicts`
-        List of dictionaries of the papers (I imagine usually just one but just in case)
+    papers : `dict`
+        Dictionaries of the paper
     """
 
     # choose an random adjective
     adjective = np.random.choice(["Splendid", "Tremendous", "Brilliant",
                                   "Excellent", "Fantastic", "Spectacular"])
 
-    # if it's just one then write some messages to them
-    if len(papers) == 1:
-        preface = f"Look what I found! :tada: {adjective} work <@{user_id}> :clap:"
-        outro = ("I put the abstract in the thread for anyone interested in learning more "
-                 f"- again, a big congratulations to <@{user_id}> for this awesome paper")
-    else:
-        # edit the messages if there is more than one paper
-        preface = (f"Look what I found! :tada: Not 1 but {len(papers)} new papers "
-                   f"from <@{user_id}>!! :clap::scream:")
-        outro = ("I put the abstracts in the thread for anyone interested in learning more "
-                 f"- again, a big congratulations to <@{user_id}> for these awesome papers")
+    preface = f"Look what I found! :tada: {adjective} work <@{user_id}> :clap:"
+    outro = ("I put the abstract in the thread for anyone interested in learning more "
+                f"- again, a big congratulations to <@{user_id}> for this awesome paper")
 
     # add the same starting blocks for all
     start_blocks = [
@@ -460,25 +454,22 @@ def announce_publication(user_id, name, papers):
     ]
 
     # add some blocks for each paper
-    paper_blocks = []
-    for paper in papers:
-        paper_blocks.extend(
-            [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"<{paper['link']}|*{paper['title']}*>"
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": bold_uw_authors(paper["authors"], name)
-                    }
-                }
-            ])
+    paper_blocks = [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"<{paper['link']}|*{paper['title']}*>"
+            }
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": bold_uw_authors(paper["authors"], name)
+            }
+        }
+    ]
 
     # add a single end block about the abstract
     end_blocks = [
@@ -501,10 +492,10 @@ def announce_publication(user_id, name, papers):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": paper['abstract']
+                    "text": p['abstract']
                 }
             }
-        ] for paper in papers
+        ] for p in [paper]
     ]
 
     # flatten out the blocks into the right format
@@ -513,11 +504,11 @@ def announce_publication(user_id, name, papers):
 
     # find the channel and send the initial message
     channel = find_channel(PAPERS_CHANNEL)
-    message = app.client.chat_postMessage(text="Congrats on your new paper(s)!",
+    message = app.client.chat_postMessage(text="Congrats on your new paper!",
                                           blocks=blocks, channel=channel, unfurl_links=False)
 
     # reply in thread with the abstracts
-    app.client.chat_postMessage(text="Your paper abstracts:", blocks=abstract_blocks,
+    app.client.chat_postMessage(text="Your paper abstract:", blocks=abstract_blocks,
                                 channel=channel, thread_ts=message["ts"])
 
 
