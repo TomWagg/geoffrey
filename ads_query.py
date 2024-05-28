@@ -171,8 +171,8 @@ def bold_uw_authors(author_string, uw_authors=None):
     for author in author_string:
         if author.count(",") != 1:
             continue
-        split_author = author.split(", ")
-        last, first = split_author
+        split_author = list(reversed(author.split(", ")))
+        first, last = split_author
         initial = first[0].lower()
         last = unidecode(last).lower()
 
