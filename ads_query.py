@@ -101,14 +101,7 @@ def filter_known_papers(papers_dict_list):
     return new_papers
 
 
-def save_papers(papers_dict_list):
-    """Save papers to a CSV file
-
-    Parameters
-    ----------
-    papers_dict_list : `list`
-        List of dictionaries of paper information
-    """
+def get_uw_authors():
     # read in the UW authors
     uw_authors_table = pd.read_csv("data/orcids.csv")
     uw_authors = defaultdict(list)
@@ -118,6 +111,18 @@ def save_papers(papers_dict_list):
     # HACK: add David and Chester's alternate names
     uw_authors["wang"].append("y")
     uw_authors["li"].append("z")
+    return uw_authors
+
+
+def save_papers(papers_dict_list):
+    """Save papers to a CSV file
+
+    Parameters
+    ----------
+    papers_dict_list : `list`
+        List of dictionaries of paper information
+    """
+    uw_authors = get_uw_authors()
 
     # create a dictionary of the data    
     df_dict = {key: [i[key] for i in papers_dict_list]
@@ -142,8 +147,8 @@ def save_papers(papers_dict_list):
     df.to_csv("data/papers.csv", index=False)
 
 
-def bold_grad_author(author_string, name):
-    """Bold the grad author in the list of authors
+def bold_uw_authors(author_string, uw_authors=None):
+    """Bold the uw authors in the list of authors
 
     Parameters
     ----------
@@ -158,7 +163,6 @@ def bold_grad_author(author_string, name):
         Author string but with asterisks around the grad
     """
     authors = "_Authors: "
-    split_name = name.split(" ")
 
     # go through each author in the list
     for author in author_string:
@@ -168,7 +172,7 @@ def bold_grad_author(author_string, name):
         first_initial, last_name = split_author[0][0], split_author[-1]
 
         # NOTE: I assume if first initial and last name match then it is the right person
-        if first_initial == split_name[0][0] and last_name == split_name[-1]:
+        if last_name in uw_authors and first_initial in uw_authors[last_name]:
             # add asterisks for bold in mrkdwn
             authors += f"*{' '.join(split_author)}*, "
         else:

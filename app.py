@@ -8,7 +8,7 @@ import pandas as pd
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from ads_query import bold_grad_author, get_ads_papers, save_papers
+from ads_query import bold_uw_authors, get_ads_papers, save_papers
 
 # Initializes your app with your bot token and socket mode handler
 app = App(token=os.environ.get("GEOFFREY_BOT_TOKEN"))
@@ -250,7 +250,7 @@ def reply_recent_papers(message, direct_msg=False):
                 preface = f"Here's the most recent paper from {tags[i]}"
 
                 # create an author list, adding each but BOLDING the author that matches the grad
-                authors = bold_grad_author(paper['authors'], names[i])
+                authors = bold_uw_authors(paper['authors'], names[i])
 
             # format the date nicely
             date_formatted = custom_strftime("%B %Y", paper['date'])
@@ -475,7 +475,7 @@ def announce_publication(user_id, name, papers):
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": bold_grad_author(paper["authors"], name)
+                        "text": bold_uw_authors(paper["authors"], name)
                     }
                 }
             ])
