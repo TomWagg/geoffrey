@@ -262,7 +262,7 @@ def reply_recent_papers(message, direct_msg=False):
                                                 "type": "section",
                                                 "text": {
                                                     "type": "mrkdwn",
-                                                    "text": f"*{paper['title']}*"
+                                                    "text": f"*{sanitise_tags(paper['title'])}*"
                                                 }
                                             },
                                             {
@@ -307,7 +307,7 @@ def reply_recent_papers(message, direct_msg=False):
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": (f"<{paper['link']}|*{paper['title']}*> - "
+                            "text": (f"<{paper['link']}|*{sanitise_tags(paper['title'])}*> - "
                                      f"_{paper['authors'][0].split(' ')[0]} "
                                      f"et al. ({paper['date'].year})_ - Cited {paper['citations']} times")
                         }
@@ -462,7 +462,7 @@ def announce_publication(user_ids, paper):
             "type": "header",
             "text": {
                 "type": "plain_text",
-                "text":f"{santinise_tags(paper['title'])}",
+                "text":f"{sanitise_tags(paper['title'])}",
             }
         },
         {
@@ -601,7 +601,7 @@ def custom_strftime(format, t):
     """ Change the default datetime strftime to use the custom suffix """
     return t.strftime(format).replace('{S}', str(t.day) + suffix(t.day))
 
-def santinise_tags(str):
+def sanitise_tags(str):
     # The regular expression pattern for substrings between < and >
     pattern = "<.*?>"
     # Use re.sub() to replace the matched substrings with an empty string
