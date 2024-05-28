@@ -461,8 +461,8 @@ def announce_publication(user_ids, paper):
         {
             "type": "header",
             "text": {
-                "type": "plain_text",
-                "text": ":rotating_light: New paper alert!! :rotating_light:",
+                "type": "mrkdwn",
+                "text":f"*{santinise_tags(paper['title'])}*",
                 "emoji": True
             }
         },
@@ -481,14 +481,14 @@ def announce_publication(user_ids, paper):
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": f"<{paper['link']}|*{paper['title']}*>"
+                "text": bold_uw_authors(paper["authors"])
             }
         },
         {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": bold_uw_authors(paper["authors"])
+                "text": f"<{paper['link']}|*ADS Link*>"
             }
         }
     ]
@@ -601,6 +601,13 @@ def suffix(d):
 def custom_strftime(format, t):
     """ Change the default datetime strftime to use the custom suffix """
     return t.strftime(format).replace('{S}', str(t.day) + suffix(t.day))
+
+def santinise_tags(str):
+    # The regular expression pattern for substrings between < and >
+    pattern = "<.*?>"
+    # Use re.sub() to replace the matched substrings with an empty string
+    output_string = re.sub(pattern, "", str)
+    return output_string
 
 
 def every_morning():
