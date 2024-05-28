@@ -250,7 +250,7 @@ def reply_recent_papers(message, direct_msg=False):
                 preface = f"Here's the most recent paper from {tags[i]}"
 
                 # create an author list, adding each but BOLDING the author that matches the grad
-                authors = bold_uw_authors(paper['authors'], names[i])
+                authors = bold_uw_authors(paper['authors'])
 
             # format the date nicely
             date_formatted = custom_strftime("%B %Y", paper['date'])
