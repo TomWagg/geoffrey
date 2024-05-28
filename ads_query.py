@@ -169,13 +169,15 @@ def bold_uw_authors(author_string, uw_authors=None):
 
     # go through each author in the list
     for author in author_string:
-        split_author = list(reversed(author.split(", ")))
-
-        # get their first initial and last name
-        first_initial, last_name = split_author[0][0].lower(), split_author[-1].lower()
+        if author.count(",") != 1:
+            continue
+        split_author = author.split(", ")
+        last, first = split_author
+        initial = first[0].lower()
+        last = unidecode(last).lower()
 
         # NOTE: I assume if first initial and last name match then it is the right person
-        if last_name in uw_authors and first_initial in uw_authors[last_name]:
+        if last in uw_authors and initial in uw_authors[last]:
             # add asterisks for bold in mrkdwn
             authors += f"*{' '.join(split_author)}*, "
         else:
