@@ -8,7 +8,7 @@ import pandas as pd
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from ads_query import bold_uw_authors, get_ads_papers, save_papers
+from ads_query import bold_uw_authors, get_ads_papers, save_papers, get_uw_authors
 
 # Initializes your app with your bot token and socket mode handler
 app = App(token=os.environ.get("GEOFFREY_BOT_TOKEN"))
@@ -374,6 +374,7 @@ def any_new_publications():
 
     # find the user ID of the person
     id_table = pd.read_csv("data/user_ids.csv")
+    uw_authors = get_uw_authors()
 
     # go through the file of grads
     orcid_file = pd.read_csv("data/orcids.csv")
@@ -400,28 +401,42 @@ def any_new_publications():
                                             channel=find_channel(PAPERS_CHANNEL))
                 initial_announcement = True
 
-            matching_usernames = id_table[id_table["username"] == row["username"]]
-            if len(matching_usernames) == 0:
-                print(f"CAN'T FIND USER ID FOR {row['username']}")
-                continue
-            user_id = matching_usernames["id"].values[0]
-
             for paper in weekly_papers:
-                announce_publication(user_id, row['first_name'] + ' ' + row["last_name"], paper)
+                announce_publication(get_author_ids(id_table, paper["authors"], uw_authors), paper)
 
     if no_new_papers:
         print("No new papers!")
 
 
-def announce_publication(user_id, name, paper):
+def get_author_ids(id_table, authors, uw_authors):
+    author_ids = []
+
+    # go through each author in the list
+    for author in authors:
+        split_author = list(reversed(author.split(", ")))
+
+        # get their first initial and last name
+        first_initial, last_name = split_author[0][0].lower(), split_author[-1].lower()
+
+        # NOTE: I assume if first initial and last name match then it is the right person
+        if last_name in uw_authors and first_initial in uw_authors[last_name]:
+            id_table["first_initial"] = id_table["real_name"].apply(lambda x: x.split(" ")[0][0].lower())
+            id_table["last_name"] = id_table["real_name"].apply(lambda x: x.split(" ")[-1].lower())
+            
+            # find row in the table that matches
+            matched_id = id_table[(id_table["first_initial"] == first_initial) & (id_table["last_name"] == last_name)]
+            if len(matched_id) > 0:
+                author_ids.append(matched_id["id"].values[0])
+    return author_ids
+
+
+def announce_publication(user_ids, paper):
     """Announce to the workspace that someone has published a new paper(s)
 
     Parameters
     ----------
     user_id : `str`
-        Slack user ID of the person
-    name : `str`
-        Plain name of the person
+        Slack user ID of the people who published the paper
     papers : `dict`
         Dictionaries of the paper
     """
@@ -429,10 +444,17 @@ def announce_publication(user_id, name, paper):
     # choose an random adjective
     adjective = np.random.choice(["Splendid", "Tremendous", "Brilliant",
                                   "Excellent", "Fantastic", "Spectacular"])
+    
+    user_id_strings = [f"<@{user_id}>" for user_id in user_ids]
+    # join user ids with commas and an "and" at the end
+    if len(user_id_strings) == 1:
+        author_id_string = user_id_strings[0]
+    else:
+        author_id_string = ", ".join(user_id_strings[:-1]) + " and " + user_id_strings[-1]
 
-    preface = f"Look what I found! :tada: {adjective} work <@{user_id}> :clap:"
+    preface = f"Look what I found! :tada: {adjective} work from {author_id_string} :clap:"
     outro = ("I put the abstract in the thread for anyone interested in learning more "
-                f"- again, a big congratulations to <@{user_id}> for this awesome paper")
+                f"- again, a big congratulations to {author_id_string} for this awesome paper")
 
     # add the same starting blocks for all
     start_blocks = [
@@ -466,7 +488,7 @@ def announce_publication(user_id, name, paper):
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": bold_uw_authors(paper["authors"], name)
+                "text": bold_uw_authors(paper["authors"])
             }
         }
     ]

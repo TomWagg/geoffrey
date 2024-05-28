@@ -169,7 +169,7 @@ def bold_uw_authors(author_string, uw_authors=None):
         split_author = list(reversed(author.split(", ")))
 
         # get their first initial and last name
-        first_initial, last_name = split_author[0][0], split_author[-1]
+        first_initial, last_name = split_author[0][0].lower(), split_author[-1].lower()
 
         # NOTE: I assume if first initial and last name match then it is the right person
         if last_name in uw_authors and first_initial in uw_authors[last_name]:
