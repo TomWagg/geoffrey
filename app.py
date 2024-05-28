@@ -461,9 +461,8 @@ def announce_publication(user_ids, paper):
         {
             "type": "header",
             "text": {
-                "type": "mrkdwn",
-                "text":f"*{santinise_tags(paper['title'])}*",
-                "emoji": True
+                "type": "plain_text",
+                "text":f"{santinise_tags(paper['title'])}",
             }
         },
         {
