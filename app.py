@@ -13,7 +13,7 @@ from ads_query import bold_uw_authors, get_ads_papers, save_papers, get_uw_autho
 # Initializes your app with your bot token and socket mode handler
 app = App(token=os.environ.get("GEOFFREY_BOT_TOKEN"))
 BOT_ID = "U06V23JH71R"
-PAPERS_CHANNEL = "geoffrey-testing"
+PAPERS_CHANNEL = "department-arxiv"
 
 """ ---------- APP MENTIONS ---------- """
 
