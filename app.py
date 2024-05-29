@@ -727,11 +727,14 @@ def any_new_publications():
 
     if no_new_papers:
         print("No new papers!")
+    else:
+        print("All done with the paper search!")
 
 
 def get_author_ids(orcids, authors, uw_authors):
     author_ids = []
     orcids["first_initial"] = orcids["first_name"].apply(lambda x: x[0].lower())
+    orcids["last_name_lower"] = orcids["last_name"].apply(lambda x: x.lower())
 
     # go through each author in the list
     for author in authors:
@@ -744,7 +747,7 @@ def get_author_ids(orcids, authors, uw_authors):
         if last_name in uw_authors and first_initial in uw_authors[last_name]:
             
             # find row in the table that matches
-            matched_id = orcids[(orcids["first_initial"] == first_initial) & (orcids["last_name"] == last_name)]
+            matched_id = orcids[(orcids["first_initial"] == first_initial) & (orcids["last_name_lower"] == last_name)]
             if len(matched_id) > 0:
                 author_ids.append(matched_id["slack_id"].values[0])
     return author_ids
