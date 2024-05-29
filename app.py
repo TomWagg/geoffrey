@@ -19,31 +19,162 @@ PAPERS_CHANNEL = "department-arxiv"
 @app.event("app_home_opened")
 def update_home_tab(client, event, logger):
     try:
-        # Call views.publish with the built-in client
-        client.views_publish(
-            # Use the user ID associated with the event
-            user_id=event["user"],
-            # Home tabs must be enabled in your app configuration
-            view={
-                "type": "home",
-                "blocks": [
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": "*Welcome home, <@" + event["user"] + "> :house:*"
-                        }
-                    },
-                    {
-                        "type": "section",
-                        "text": {
-                          "type": "mrkdwn",
-                          "text": "Learn how home tabs can be more useful and interactive <https://api.slack.com/surfaces/tabs/using|*in the documentation*>."
-                        }
+        home_blocks = {
+            "type": "home",
+            "blocks": [
+                {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": ":house: Salutations my friend and welcome to my humble abode!",
                     }
-                ]
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "My name's Geoffrey. I like reading papers. Help me read yours!"
+                    }
+                },
+                {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": ":grey_question: Example Queries",
+                    }
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"I'm here to help with all of your paper needs! You can send me a direct message (click the messages tab at the top of this page) or tag me in a message in <#{find_channel(PAPERS_CHANNEL)}> with a query like the ones below."
+                    }
+                },
+                {
+                    "type": "rich_text",
+                    "elements": [
+                        {
+                            "type": "rich_text_list",
+                            "style": "bullet",
+                            "elements": [
+                                {
+                                    "type": "rich_text_section",
+                                    "elements": [
+                                        {
+                                            "type": "text",
+                                            "text": "Could you please show me my most recent paper?"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "rich_text_section",
+                                    "elements": [
+                                        {
+                                            "type": "text",
+                                            "text": f"Can you please list "
+                                        },
+                                        {
+                                            "type": "user",
+                                            "user_id": BOT_ID,
+                                        },
+                                        {
+                                            "type": "text",
+                                            "text": "'s 5 most recent papers?"
+                                        },
+                                    ]
+                                },
+                                {
+                                    "type": "rich_text_section",
+                                    "elements": [
+                                        {
+                                            "type": "text",
+                                            "text": f"How are you doing today "
+                                        },
+                                        {
+                                            "type": "user",
+                                            "user_id": BOT_ID,
+                                        },
+                                        {
+                                            "type": "text",
+                                            "text": "?"
+                                        },
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "Manners maketh the bot, so don't forget to say please! :blush:"
+                    }
+                },
+                {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": ":bust_in_silhouette: Your information",
+                    }
+                },
+            ]
+        }
+
+        orcids = pd.read_csv("data/orcids.csv")
+        matching_rows = orcids[orcids["slack_id"] == event["user"]]
+        if len(matching_rows) == 0:
+            no_info_block = {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Sorry <@" + event["user"] + ">, it seems we haven't met yet! :wave: Would you be a dear and tell me a bit about yourself for me?"
+                }
             }
-        )
+            home_blocks["blocks"].append(no_info_block)
+        else:
+            info = matching_rows.iloc[0]
+            info_blocks = [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "Lovely to see you again <@" + event["user"] + ">! :relaxed: If my memory serves me, your information is:"
+                    }
+                },
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": f":abc: *First name*: {info["first_name"]}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f":tulip: *ORCID*: {info["orcid"]}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f":abc: *Last name*: {info["last_name"]}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f":scientist: *Role*: {info["role"]}"
+                        },
+                    ],
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "Let me know if I should update any of this with the button below."
+                    }
+                }
+            ]
+            home_blocks["blocks"] += info_blocks
+
+        # Call views.publish with the built-in client
+        client.views_publish(user_id=event["user"], view=home_blocks)
     except Exception as e:
         logger.error(f"Error publishing home tab: {e}")
 
