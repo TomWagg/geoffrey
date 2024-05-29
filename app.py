@@ -251,29 +251,40 @@ def update_user_info(ack, body, client):
     ack()
 
     user = body["user"]["id"]
-
     state = body["view"]["state"]["values"]
-
-    print(state)
 
     first_name = list(state['first-name'].values())[0]['value']
     last_name = list(state['last-name'].values())[0]['value']
     role = list(state['role'].values())[0]['selected_option']['value']
     orcid = list(state['orcid'].values())[0]['value']
 
-    orcids = pd.read_csv("data/orcids.csv")
-    matching_rows = orcids[orcids["slack_id"] == user]
-    if len(matching_rows) == 0:
-        orcids.loc[len(orcids)] = [orcid, first_name, last_name, role, user]
+    # ensure that the ORCID is four groups of four digits separated by hyphens
+    if not (re.match(r"\d{4}-\d{4}-\d{4}-\d{4}", orcid) and len(orcid) == 4*4 + 3):
+        client.chat_postMessage(channel=user,
+                                text=(f"So...I have good news and bad news <@{user}>.\n\n:this-is-fine-fire: The bad news is that "
+                                      "the ORCID you just submitted doesn't look quite right. It should be "
+                                      "four groups of four digits separated by hyphens, but you submitted "
+                                      f"``{orcid}``.\n\n:woohoo: The good news is that I won't hold it against you because "
+                                      "I know typing numbers can be hard with your little human fingers "
+                                      ":upside_down_face: Give it another go and I'm sure you'll get it "
+                                      "right, I believe in you!"))
     else:
-        orcids.loc[matching_rows.index, "first_name"] = first_name
-        orcids.loc[matching_rows.index, "last_name"] = last_name
-        orcids.loc[matching_rows.index, "role"] = role
-        orcids.loc[matching_rows.index, "orcid"] = orcid
+        orcids = pd.read_csv("data/orcids.csv")
+        matching_rows = orcids[orcids["slack_id"] == user]
+        if len(matching_rows) == 0:
+            orcids.loc[len(orcids)] = [orcid, first_name, last_name, role, user]
+        else:
+            orcids.loc[matching_rows.index, "first_name"] = first_name
+            orcids.loc[matching_rows.index, "last_name"] = last_name
+            orcids.loc[matching_rows.index, "role"] = role
+            orcids.loc[matching_rows.index, "orcid"] = orcid
 
-    orcids.to_csv("data/orcids.csv", index=False)
+        orcids.to_csv("data/orcids.csv", index=False)
 
-    client.chat_postMessage(channel=user, text=f"Thanks for updating your information <@{user}>, looking forward to reading your papers! :relaxed:")
+        client.chat_postMessage(channel=user, text=(f"Thanks for updating your information <@{user}>, "
+                                                    "looking forward to reading your papers! :relaxed:"))
+        update_home_tab(client, {"user": user}, None)
+        
 
 """ ---------- APP MENTIONS ---------- """
 
