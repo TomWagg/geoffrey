@@ -72,19 +72,19 @@ def update_home_tab(client, event, logger):
                     "fields": [
                         {
                             "type": "mrkdwn",
-                            "text": f":abc: *First name*: {info["first_name"]}"
+                            "text": f":abc: *First name*: {info['first_name']}"
                         },
                         {
                             "type": "mrkdwn",
-                            "text": f":tulip: *ORCID*: {info["orcid"]}"
+                            "text": f":tulip: *ORCID*: {info['orcid']}"
                         },
                         {
                             "type": "mrkdwn",
-                            "text": f":abc: *Last name*: {info["last_name"]}"
+                            "text": f":abc: *Last name*: {info['last_name']}"
                         },
                         {
                             "type": "mrkdwn",
-                            "text": f":scientist: *Role*: {info["role"]}"
+                            "text": f":scientist: *Role*: {info['role']}"
                         },
                     ],
                 },
