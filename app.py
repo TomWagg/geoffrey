@@ -678,23 +678,13 @@ def get_orcid_from_id(user_id):
     name : `str`
         Person's full name
     """
-    search_username = None
-
-    id_table = pd.read_csv("data/user_ids.csv")
-    matching_ids = id_table[id_table["id"] == user_id]
-    if len(matching_ids) == 0:
-        return None, None, None
-    else:
-        search_username = matching_ids["username"].values[0]
-
-    # find matching orcid ID
     orcids = pd.read_csv("data/orcids.csv")
-    matching_ids = orcids[orcids["username"] == search_username]
-    if len(matching_ids) == 0:
+    matching_rows = orcids[orcids["slack_id"] == user_id]
+    if len(matching_rows) == 0:
         return None, None, None
     else:
-        return matching_ids["orcid"].values[0], matching_ids["first_name"].values[0],\
-            matching_ids["last_name"].values[0]
+        return matching_rows["orcid"].values[0], matching_rows["first_name"].values[0],\
+            matching_rows["last_name"].values[0]
 
 
 
@@ -705,7 +695,6 @@ def any_new_publications():
     initial_announcement = False
 
     # find the user ID of the person
-    id_table = pd.read_csv("data/user_ids.csv")
     uw_authors = get_uw_authors()
 
     # go through the file of grads
@@ -734,14 +723,15 @@ def any_new_publications():
                 initial_announcement = True
 
             for paper in weekly_papers:
-                announce_publication(get_author_ids(id_table, paper["authors"], uw_authors), paper)
+                announce_publication(get_author_ids(orcid_file, paper["authors"], uw_authors), paper)
 
     if no_new_papers:
         print("No new papers!")
 
 
-def get_author_ids(id_table, authors, uw_authors):
+def get_author_ids(orcids, authors, uw_authors):
     author_ids = []
+    orcids["first_initial"] = orcids["first_name"].apply(lambda x: x[0].lower())
 
     # go through each author in the list
     for author in authors:
@@ -752,13 +742,11 @@ def get_author_ids(id_table, authors, uw_authors):
 
         # NOTE: I assume if first initial and last name match then it is the right person
         if last_name in uw_authors and first_initial in uw_authors[last_name]:
-            id_table["first_initial"] = id_table["real_name"].apply(lambda x: x.split(" ")[0][0].lower())
-            id_table["last_name"] = id_table["real_name"].apply(lambda x: x.split(" ")[-1].lower())
             
             # find row in the table that matches
-            matched_id = id_table[(id_table["first_initial"] == first_initial) & (id_table["last_name"] == last_name)]
+            matched_id = orcids[(orcids["first_initial"] == first_initial) & (orcids["last_name"] == last_name)]
             if len(matched_id) > 0:
-                author_ids.append(matched_id["id"].values[0])
+                author_ids.append(matched_id["slack_id"].values[0])
     return author_ids
 
 
