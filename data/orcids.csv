@@ -1,51 +1,51 @@
-orcid,first_name,last_name,username,role,slack_id
-0000-0002-0802-9145,Eric,Agol,agol,Professor,U0113V1MPF0
-0000-0002-6404-9562,Scott,Anderson,sfander,Professor,U02HA6L26C9
-0000-0001-6487-5445,Rory,Barnes,rkb9,Associate Professor,U02L0EFQQ9W
-0000-0001-8018-5348,Eric,Bellm,ecbellm,Research Associate Professor,U01FFKVKHPB
-0000-0001-5576-8189,Andy,Connolly,ajc,Professor,U01AHKL3YNR
-0000-0002-0637-835X,James,Davenport,jrad,Research Assistant Professor,U01EVNU9CSJ
-0000-0003-1996-9252,Mario,Juric,mjuric,Professor,U010S079NBT
-0000-0003-2184-1581,Emily,Levesque,emsque,Associate Professor,U01GBVAGR96
-0000-0001-7961-9735,Matt,McQuinn,mcquinn,Associate Professor,U01J9HFB84R
-0000-0002-1386-1710,Vikki,Meadows,meadows,Professor,U01ELJS3T4P
-0000-0001-5510-2803,Tom,Quinn,trq,Professor,U01F1FC21QT
-0000-0003-2486-3858,Jose,Sanchez-Gallego,gallegoj,Research Assistant Professor,U03DBQWGBK9
-0000-0002-7327-565X,Sarah,Tuttle,tuttlese,Associate Professor,U0114TCRCQ4
-0000-0002-7502-0597,Ben,Williams,benw1,Research Associate Professor,U01EV17RC3G
-0000-0003-4373-7777,Paula,Szkody,szkody,Professor Emeritus,U01F1V3A3AP
-0000-0003-3287-5250,Neven,Caplar,ncaplar,Research Scientist,U042Z4EFJAD
-0000-0001-7335-1715,Colin,Chandler,coc123,Postdoc,U042LM55H54
-0000-0002-1264-2006,Julianne,Dalcanton,jd,Professor Emeritus,U01304RKF4N
-0000-0002-2525-9647,Aritra,Ghosh,aritrag,Postdoc,U06156F3A3T
-0000-0003-2599-7524,Adam,Smercina,asmerci,Postdoc,U02K1KX5FAQ
-0000-0003-0743-9422,Pedro,Bernardinelli,phbern,Postdoc,U02JZEYTNSW
-0000-0003-3520-6503,Yakov,Faerman,yakov.faerman,Acting Instructor,U02E3HYFEJC
-0000-0002-0355-0134,Jess,Werk,jwerk,Professor,U01A7Q03KPZ
-0000-0001-5250-2633,Zeljko,Ivezic,ivezic,Professor,U01F1EW0ARZ
-0000-0002-7961-6881,Jessica,Birky,jbirky,Graduate Student,U01154FQPGD
-0000-0002-9040-672X,Bonni,Choi,bechoi,Graduate Student,U02FJLS4YAH
-0000-0003-3429-4142,Miles,Currie,mcurr,Graduate Student,U010YQHC1R7
-0000-0002-8928-3929,Hector Emanuel Delgado,Diaz,hdelgad9,Graduate Student,U010VED695F
-0000-0003-4521-2421,Sam,Garza,samgarza,Graduate Student,U02G1R7KW0M
-0000-0002-4061-3827,Bethlee M.,Lindor,blindor,Graduate Student,U011BDR17PZ
-0000-0001-5820-3925,Joachim,Moeyens,moeyensj,Graduate Student,U02RRQMBN2X
-0000-0002-7712-6678,Steven,Stetzler,stevengs,Graduate Student,U010SK3UUKC
-0000-0003-4471-1042,Gabrielle,Suissa,suissa,Graduate Student,U01B2BKKF54
-0000-0001-5455-6678,Lupita,Tovar,tovarg,Graduate Student,U03L4QRK540
-0000-0002-6440-1087,Debby,Tran,detran,Graduate Student,U010VE65WMP
-0000-0003-0484-3331,Andy,Tzanidakis,atzanida,Graduate Student,U02FY2SBD4N
-0000-0001-6147-5761,Tom,Wagg,tomwagg,Graduate Student,U02GUDS6MDW
-0000-0001-5538-0395,David,Wang,ykwang,Graduate Student,U01BMJWRBPB
-0000-0001-6320-2230,Tobin,Wainer,tobinw,Graduate Student,U040VGSE4H5
-0000-0002-2495-3514,John Franklin,Crenshaw,jfc20,Graduate Student,U01TEM0FWQ4
-0000-0002-0604-5440,Lauryn,Williams,laurynwi,Graduate Student,U041NNKKASD
-0000-0003-4285-4453,Chester,Li,zhuofu,Graduate Student,U041A11D56X
-0009-0009-9700-1811,Binh,Nguyen,ngbinh,Graduate Student,U05QZV81DUP
-0000-0002-8766-6627,Hurum Maksora,Tohfa,htohfa,Graduate Student,U05RBHZ2M0D
-0009-0002-4643-1845,Oge,Okoronkwo,ogeoko,Graduate Student,U05QZV7Q5NK
-0000-0002-6307-7932,Pip,Petersen,speter7,Graduate Student,U05RT4W2GGH
-0000-0002-3221-9395,Valeria,Hurtado,vhurtado,Graduate Student,U0413FR1FPY
-0000-0002-6823-7798,Ishan,Ghosh-Coutinho,ifc2002,Undergraduate Student,U03HFJUBQLX
-0009-0005-5452-0671,Jake,Kurlander,jkurla,Graduate Student,U0413FR1T46
-0000-0002-6825-5283,J.Bryce,Kalmbach,brycek,Postdoc,U02JZEYL0HG
+orcid,first_name,last_name,role,slack_id
+0000-0002-0802-9145,Eric,Agol,Professor,U0113V1MPF0
+0000-0002-6404-9562,Scott,Anderson,Professor,U02HA6L26C9
+0000-0001-6487-5445,Rory,Barnes,Associate Professor,U02L0EFQQ9W
+0000-0001-8018-5348,Eric,Bellm,Research Associate Professor,U01FFKVKHPB
+0000-0001-5576-8189,Andy,Connolly,Professor,U01AHKL3YNR
+0000-0002-0637-835X,James,Davenport,Research Assistant Professor,U01EVNU9CSJ
+0000-0003-1996-9252,Mario,Juric,Professor,U010S079NBT
+0000-0003-2184-1581,Emily,Levesque,Associate Professor,U01GBVAGR96
+0000-0001-7961-9735,Matt,McQuinn,Associate Professor,U01J9HFB84R
+0000-0002-1386-1710,Vikki,Meadows,Professor,U01ELJS3T4P
+0000-0001-5510-2803,Tom,Quinn,Professor,U01F1FC21QT
+0000-0003-2486-3858,Jose,Sanchez-Gallego,Research Assistant Professor,U03DBQWGBK9
+0000-0002-7327-565X,Sarah,Tuttle,Associate Professor,U0114TCRCQ4
+0000-0002-7502-0597,Ben,Williams,Research Associate Professor,U01EV17RC3G
+0000-0003-4373-7777,Paula,Szkody,Professor Emeritus,U01F1V3A3AP
+0000-0003-3287-5250,Neven,Caplar,Research Scientist,U042Z4EFJAD
+0000-0001-7335-1715,Colin,Chandler,Postdoc,U042LM55H54
+0000-0002-1264-2006,Julianne,Dalcanton,Professor Emeritus,U01304RKF4N
+0000-0002-2525-9647,Aritra,Ghosh,Postdoc,U06156F3A3T
+0000-0003-2599-7524,Adam,Smercina,Postdoc,U02K1KX5FAQ
+0000-0003-0743-9422,Pedro,Bernardinelli,Postdoc,U02JZEYTNSW
+0000-0003-3520-6503,Yakov,Faerman,Acting Instructor,U02E3HYFEJC
+0000-0002-0355-0134,Jess,Werk,Professor,U01A7Q03KPZ
+0000-0001-5250-2633,Zeljko,Ivezic,Professor,U01F1EW0ARZ
+0000-0002-7961-6881,Jessica,Birky,Graduate Student,U01154FQPGD
+0000-0002-9040-672X,Bonni,Choi,Graduate Student,U02FJLS4YAH
+0000-0003-3429-4142,Miles,Currie,Graduate Student,U010YQHC1R7
+0000-0002-8928-3929,Hector Emanuel Delgado,Diaz,Graduate Student,U010VED695F
+0000-0003-4521-2421,Sam,Garza,Graduate Student,U02G1R7KW0M
+0000-0002-4061-3827,Bethlee M.,Lindor,Graduate Student,U011BDR17PZ
+0000-0001-5820-3925,Joachim,Moeyens,Graduate Student,U02RRQMBN2X
+0000-0002-7712-6678,Steven,Stetzler,Graduate Student,U010SK3UUKC
+0000-0003-4471-1042,Gabrielle,Suissa,Graduate Student,U01B2BKKF54
+0000-0001-5455-6678,Lupita,Tovar,Graduate Student,U03L4QRK540
+0000-0002-6440-1087,Debby,Tran,Graduate Student,U010VE65WMP
+0000-0003-0484-3331,Andy,Tzanidakis,Graduate Student,U02FY2SBD4N
+0000-0001-5538-0395,David,Wang,Graduate Student,U01BMJWRBPB
+0000-0001-6320-2230,Tobin,Wainer,Graduate Student,U040VGSE4H5
+0000-0002-2495-3514,John Franklin,Crenshaw,Graduate Student,U01TEM0FWQ4
+0000-0002-0604-5440,Lauryn,Williams,Graduate Student,U041NNKKASD
+0000-0003-4285-4453,Chester,Li,Graduate Student,U041A11D56X
+0009-0009-9700-1811,Binh,Nguyen,Graduate Student,U05QZV81DUP
+0000-0002-8766-6627,Hurum Maksora,Tohfa,Graduate Student,U05RBHZ2M0D
+0009-0002-4643-1845,Oge,Okoronkwo,Graduate Student,U05QZV7Q5NK
+0000-0002-6307-7932,Pip,Petersen,Graduate Student,U05RT4W2GGH
+0000-0002-3221-9395,Valeria,Hurtado,Graduate Student,U0413FR1FPY
+0000-0002-6823-7798,Ishan,Ghosh-Coutinho,Undergraduate,U03HFJUBQLX
+0009-0005-5452-0671,Jake,Kurlander,Graduate Student,U0413FR1T46
+0000-0002-6825-5283,J.Bryce,Kalmbach,Postdoc,U02JZEYL0HG
+0000-0001-6147-5761,Tom,Wagg,Graduate Student,U02GUDS6MDW

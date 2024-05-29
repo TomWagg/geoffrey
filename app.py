@@ -173,10 +173,183 @@ def update_home_tab(client, event, logger):
             ]
             home_blocks["blocks"] += info_blocks
 
+        home_blocks["blocks"].append({
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "Update info",
+					},
+					"value": f"{event['user']}" if len(matching_rows) == 0 else f"{event['user']},{info['first_name']},{info['last_name']},{info['orcid']},{info['role']}",
+					"action_id": "update-user-info-open"
+				}
+			]
+		})
+
         # Call views.publish with the built-in client
         client.views_publish(user_id=event["user"], view=home_blocks)
     except Exception as e:
         logger.error(f"Error publishing home tab: {e}")
+
+
+@app.action("update-user-info-open")
+def update_user_info_open(ack, body, client):
+    ack()
+
+    # open the modal when someone clicks the button
+    user_and_info = body["actions"][0]["value"]
+    if "," in user_and_info:
+        user, first_name, last_name, orcid, role = user_and_info.split(",")
+    else:
+        user = user_and_info
+        first_name, last_name, orcid, role = "", "", "", ""
+
+    possible_roles = ["Undergraduate", "Graduate Student", "Postdoc", "Research Scientist", "Acting Instructor",
+                      "Teaching Faculty", 'Research Assistant Professor', 'Research Associate Professor',
+                      'Assistant Professor', 'Associate Professor', 'Professor', 'Professor Emeritus']
+
+    select_block = {
+        "type": "input",
+        "block_id": "role",
+        "element": {
+            "type": "static_select",
+            "placeholder": {
+                "type": "plain_text",
+                "text": "Select your role",
+            },
+            "options": [
+                {
+                    "text": {
+                        "type": "plain_text",
+                        "text": r,
+                    },
+                    "value": r
+                } for r in possible_roles
+            ],
+        },
+        "label": {
+            "type": "plain_text",
+            "text": "Role",
+            "emoji": True
+        }
+    }
+    # 0000-0001-6147-5761,Tom,Wagg,Graduate Student,U02GUDS6MDW
+
+    if role != "":
+        select_block["element"]["initial_option"] = {
+            "text": {
+                "type": "plain_text",
+                "text": role,
+            },
+            "value": role
+        }
+
+    client.views_open(trigger_id=body["trigger_id"], view={
+        "callback_id": "update-user-info",
+        "title": {
+            "type": "plain_text",
+            "text": "Introductions",
+            "emoji": True
+        },
+        "submit": {
+            "type": "plain_text",
+            "text": "Submit",
+            "emoji": True,
+        },
+        "type": "modal",
+        "close": {
+            "type": "plain_text",
+            "text": "Cancel",
+            "emoji": True
+        },
+        "blocks": [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Tell me about yourself!",
+                    "emoji": True
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"Let's make sure I have all the right info about you <@{user}>, please fill out the form below :relaxed:"
+                }
+            },
+            {
+                "type": "input",
+                "block_id": "first-name",
+                "element": {
+                    "type": "plain_text_input",
+                    "initial_value": first_name,
+                },
+                "label": {
+                    "type": "plain_text",
+                    "text": "First name",
+                    "emoji": True
+                }
+            },
+            {
+                "type": "input",
+                "block_id": "last-name",
+                "element": {
+                    "type": "plain_text_input",
+                    "initial_value": last_name,
+                },
+                "label": {
+                    "type": "plain_text",
+                    "text": "Last name",
+                    "emoji": True
+                }
+            },
+            select_block,
+            {
+                "type": "input",
+                "block_id": "orcid",
+                "element": {
+                    "type": "plain_text_input",
+                    "initial_value": orcid,
+                },
+                "label": {
+                    "type": "plain_text",
+                    "text": "ORCID",
+                }
+            },
+        ]
+    })
+
+@app.view("update-user-info")
+def update_user_info(ack, body, client):
+    ack()
+
+    user = body["user"]["id"]
+
+    state = body["view"]["state"]["values"]
+
+    print(state)
+
+    first_name = list(state['first-name'].values())[0]['value']
+    last_name = list(state['last-name'].values())[0]['value']
+    role = list(state['role'].values())[0]['selected_option']['value']
+    orcid = list(state['orcid'].values())[0]['value']
+
+    orcids = pd.read_csv("data/orcids.csv")
+    matching_rows = orcids[orcids["slack_id"] == user]
+    if len(matching_rows) == 0:
+        orcids.loc[len(orcids)] = [orcid, first_name, last_name, role, user]
+    else:
+        orcids.loc[matching_rows.index, "first_name"] = first_name
+        orcids.loc[matching_rows.index, "last_name"] = last_name
+        orcids.loc[matching_rows.index, "role"] = role
+        orcids.loc[matching_rows.index, "orcid"] = orcid
+
+    orcids.to_csv("data/orcids.csv", index=False)
+
+    client.chat_postMessage(channel=user, text=f"Thanks for updating your information <@{user}>, looking forward to reading your papers! :relaxed:")
 
 """ ---------- APP MENTIONS ---------- """
 
