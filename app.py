@@ -40,81 +40,6 @@ def update_home_tab(client, event, logger):
                     "type": "header",
                     "text": {
                         "type": "plain_text",
-                        "text": ":grey_question: Example Queries",
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"I'm here to help with all of your paper needs! You can send me a direct message (click the messages tab at the top of this page) or tag me in a message in <#{find_channel(PAPERS_CHANNEL)}> with a query like the ones below."
-                    }
-                },
-                {
-                    "type": "rich_text",
-                    "elements": [
-                        {
-                            "type": "rich_text_list",
-                            "style": "bullet",
-                            "elements": [
-                                {
-                                    "type": "rich_text_section",
-                                    "elements": [
-                                        {
-                                            "type": "text",
-                                            "text": "Could you please show me my most recent paper?"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "type": "rich_text_section",
-                                    "elements": [
-                                        {
-                                            "type": "text",
-                                            "text": f"Can you please list "
-                                        },
-                                        {
-                                            "type": "user",
-                                            "user_id": BOT_ID,
-                                        },
-                                        {
-                                            "type": "text",
-                                            "text": "'s 5 most recent papers?"
-                                        },
-                                    ]
-                                },
-                                {
-                                    "type": "rich_text_section",
-                                    "elements": [
-                                        {
-                                            "type": "text",
-                                            "text": f"How are you doing today "
-                                        },
-                                        {
-                                            "type": "user",
-                                            "user_id": BOT_ID,
-                                        },
-                                        {
-                                            "type": "text",
-                                            "text": "?"
-                                        },
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "Manners maketh the bot, so don't forget to say please! :blush:"
-                    }
-                },
-                {
-                    "type": "header",
-                    "text": {
-                        "type": "plain_text",
                         "text": ":bust_in_silhouette: Your information",
                     }
                 },
@@ -235,7 +160,6 @@ def update_user_info_open(ack, body, client):
             "emoji": True
         }
     }
-    # 0000-0001-6147-5761,Tom,Wagg,Graduate Student,U02GUDS6MDW
 
     if role != "":
         select_block["element"]["initial_option"] = {
@@ -502,7 +426,6 @@ def reply_recent_papers(message):
         A slack message object
     """
     orcids = []
-    names = []
     direct_queries = True
 
     thread_ts = None if message["type"] == "message" else message["ts"]
@@ -529,12 +452,10 @@ def reply_recent_papers(message):
             # go through each of them
             for tag in tags:
                 # convert the tag to an query and a name
-                orcid, first_name, last_name = get_orcid_from_id(tag.replace("<@", "").replace(">", ""))
-                print("ADS details:", orcid, first_name, last_name)
+                orcid = get_orcid_from_id(tag.replace("<@", "").replace(">", ""))
 
                 # append info
                 orcids.append(orcid)
-                names.append(first_name + " " + last_name)
 
     # if we found no queries through all of that then crash out with a message
     if len(orcids) == 0:
@@ -547,8 +468,10 @@ def reply_recent_papers(message):
     # go through each orcid
     for i in range(len(orcids)):
         if orcids[i] is None:
-            app.client.chat_postMessage(text=(f"{insert_british_consternation()} I'm terribly sorry old chap "
-                                              "but I couldn't find an ORCID for this user :thinking-face:"),
+            app.client.chat_postMessage(text=(f"I'm terribly sorry old chap but I couldn't find an ORCID for "
+                                              "this user :sweat_smile: You should get them to introduce "
+                                              "themself to me in my home page, I always enjoy making a new "
+                                              "friend!"),
                                         channel=message["channel"], thread_ts=thread_ts)
             continue
 
@@ -557,7 +480,7 @@ def reply_recent_papers(message):
         papers = get_ads_papers(query=query)
         if papers is None:
             app.client.chat_postMessage(text=("Terribly sorry old chap but it seems that there's a problem "
-                                              f"with that ADS query ({query}) :thinking-face:. Check you"
+                                              f"with that ADS query ({query}) :sweat_smile:. Check you"
                                               "  don't have a typo of some sort!"),
                                         channel=message["channel"], thread_ts=thread_ts)
             return
@@ -681,10 +604,9 @@ def get_orcid_from_id(user_id):
     orcids = pd.read_csv("data/orcids.csv")
     matching_rows = orcids[orcids["slack_id"] == user_id]
     if len(matching_rows) == 0:
-        return None, None, None
+        return None
     else:
-        return matching_rows["orcid"].values[0], matching_rows["first_name"].values[0],\
-            matching_rows["last_name"].values[0]
+        return matching_rows["orcid"].values[0]
 
 
 
