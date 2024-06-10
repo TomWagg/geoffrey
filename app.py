@@ -441,7 +441,7 @@ def reply_recent_papers(message):
 
     thread_ts = None if message["type"] == "message" else message["ts"]
 
-    numbers = re.findall(r" \d* ", message["text"])
+    numbers = re.findall(r"\d+", message["text"])
     n_papers = 1 if len(numbers) == 0 else int(numbers[0])
 
     # if don't find any then look for users instead
