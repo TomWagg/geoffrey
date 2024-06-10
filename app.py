@@ -2,6 +2,8 @@ import os
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 import re
+import requests
+
 import numpy as np
 import datetime
 import pandas as pd
@@ -98,20 +100,50 @@ def update_home_tab(client, event, logger):
             ]
             home_blocks["blocks"] += info_blocks
 
-        home_blocks["blocks"].append({
-			"type": "actions",
-			"elements": [
-				{
-					"type": "button",
-					"text": {
-						"type": "plain_text",
-						"text": "Update info",
-					},
-					"value": f"{event['user']}" if len(matching_rows) == 0 else f"{event['user']},{info['first_name']},{info['last_name']},{info['orcid']},{info['role']}",
-					"action_id": "update-user-info-open"
-				}
-			]
-		})
+        home_blocks["blocks"] += [
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Update info",
+                        },
+                        "value": f"{event['user']}" if len(matching_rows) == 0 else f"{event['user']},{info['first_name']},{info['last_name']},{info['orcid']},{info['role']}",
+                        "action_id": "update-user-info-open"
+                    }
+                ]
+            },
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": ":open_file_folder: Full paper list",
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "If you'd like to get a CSV file of all the papers I've got in my databanks then click the button below!"
+                }
+            },
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Get full paper file",
+                        },
+                        "value": f"{event['user']}",
+                        "action_id": "send-all-papers"
+                    }
+                ]
+            }
+        ]
 
         # Call views.publish with the built-in client
         client.views_publish(user_id=event["user"], view=home_blocks)
@@ -285,6 +317,39 @@ def update_user_info(ack, body, client):
                                                     "looking forward to reading your papers! :relaxed:"))
         update_home_tab(client, {"user": user}, None)
         
+
+@app.action("send-all-papers")
+def send_all_papers(ack, body, client):
+    ack()
+
+    # get the user ID from the action
+    user = body["actions"][0]["value"]
+
+    # get the direct message channel ID for this user
+    user_dm = client.conversations_open(users=user)["channel"]["id"]
+
+    # calculate the file size and get the upload URL
+    file_stats = os.stat("data/papers.csv")
+    upload_res = client.files_getUploadURLExternal(filename="papers.csv", length=file_stats.st_size)
+    
+    # if the upload was successful then send the file
+    if upload_res["ok"]:
+        
+        # perform a POST request using requests to the upload URL as raw bytes
+        with open("data/papers.csv", "rb") as f:
+            r = requests.post(upload_res["upload_url"], files={'upload_file': open('data/papers.csv','rb')})
+            if r.status_code == 200:
+                # complete the request with a message to the user
+                client.files_completeUploadExternal(channel_id=user_dm,
+                                                    initial_comment="Here's the file you wanted!",
+                                                    files=[{'id': upload_res['file_id'], "title": "papers.csv"}])
+            else:
+                # if the upload failed then send a message to the user
+                client.chat_postMessage(channel=user_dm, text=f"{insert_british_consternation()} Sorry, I couldn't get the file to upload to Slack for you, I'm not sure what went wrong :pleading_face: Maybe try again?")
+    else:
+        # if we couldn't get the upload URL then send a message to the user
+        client.chat_postMessage(channel=user_dm, text=f"{insert_british_consternation()} Sorry, I couldn't get the file for you, I'm not sure what went wrong :pleading_face: Maybe try again?")
+
 
 """ ---------- APP MENTIONS ---------- """
 
