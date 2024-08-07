@@ -28,7 +28,7 @@ def get_ads_papers(query, astronomy_collection=True, past_week=False, allowed_ty
     if past_week:
         # use datetime to work out the dates
         today = datetime.date.today()
-        week_ago = today - datetime.timedelta(weeks=1)
+        week_ago = today - datetime.timedelta(weeks=4)
 
         # restrict the entdates to the date range of last week
         query += f" entdate:[{week_ago.strftime('%Y-%m-%d')} TO {today.strftime('%Y-%m-%d')}]"
