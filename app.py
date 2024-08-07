@@ -777,13 +777,18 @@ def announce_publication(user_ids, paper):
     outro = ("I put the abstract in the thread for anyone interested in learning more "
                 f"- again, a big congratulations to {author_id_string} for this awesome paper")
 
+    # shorten long titles
+    title = sanitise_tags(paper["title"])
+    if len(title) > 150:
+        title = title[:147] + "..."
+
     # add the same starting blocks for all
     start_blocks = [
         {
             "type": "header",
             "text": {
                 "type": "plain_text",
-                "text":f"{sanitise_tags(paper['title'])}",
+                "text":f"{title}",
             }
         },
         {
