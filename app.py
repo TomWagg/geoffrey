@@ -278,6 +278,33 @@ def update_user_info_open(ack, body, client):
         ]
     })
 
+def orcid_checksum(orcid):
+    """Check whether an ORCID is valid
+
+    Based on the checksum algorithm described here:
+    https://support.orcid.org/hc/en-us/articles/360006897674-Structure-of-the-ORCID-Identifier
+
+    Parameters
+    ----------
+    orcid : `str`
+        Full ORCID
+
+    Returns
+    -------
+    valid : `bool`
+        Whether the ORCID is valid
+    """
+    total = 0
+    for char in orcid[:-1]:
+        if char == "-":
+            continue
+        digit = int(char)
+        total = (total + digit) * 2
+    remainder = total % 11
+    result = (12 - remainder) % 11
+    check_digit = "X" if result == 10 else str(result)
+    return check_digit == orcid[-1]
+
 @app.view("update-user-info")
 def update_user_info(ack, body, client):
     ack()
@@ -291,7 +318,9 @@ def update_user_info(ack, body, client):
     orcid = list(state['orcid'].values())[0]['value']
 
     # ensure that the ORCID is four groups of four digits separated by hyphens
-    if not (re.match(r"\d{4}-\d{4}-\d{4}-\d{4}", orcid) and len(orcid) == 4*4 + 3):
+    if not (re.match(r"\d{4}-\d{4}-\d{4}-[\dX]{4}", orcid)
+            and len(orcid) == 4*4 + 3
+            and orcid_checksum(orcid)):
         client.chat_postMessage(channel=user,
                                 text=(f"So...I have good news and bad news <@{user}>.\n\n:this-is-fine-fire: The bad news is that "
                                       "the ORCID you just submitted doesn't look quite right. It should be "
