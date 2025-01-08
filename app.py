@@ -720,18 +720,14 @@ def any_new_publications():
     print("Starting paper search!")
     no_new_papers = True
 
-    initial_announcement = False
-
     # find the user ID of all UW authors
     uw_authors = get_uw_authors()
 
     # go through the file of people in the department
     orcid_file = pd.read_csv("data/orcids.csv")
     papers = []
-    no_new_papers = False
 
     for i, row in orcid_file.iterrows():
-        break
         query = f'orcid:{row["orcid"]}'
 
         # get the papers from the last week
@@ -745,20 +741,6 @@ def any_new_publications():
         if len(weekly_papers) > 0:
             papers += weekly_papers
             no_new_papers = False
-            continue
-            save_papers(weekly_papers)
-            no_new_papers = False
-
-            # if Geoffrey hasn't announced that he's looking at papers yet
-            if not initial_announcement:
-                # send an announcement and remember to not do that next time
-                app.client.chat_postMessage(text=("It's time for our weekly paper round up, let's see "
-                                                    "what everyone's been publishing in this last week!"),
-                                            channel=find_channel(PAPERS_CHANNEL))
-                initial_announcement = True
-
-            for paper in weekly_papers:
-                announce_publication(get_author_ids(orcid_file, paper["authors"], uw_authors), paper)
 
     if no_new_papers:
         print("No new papers!")
