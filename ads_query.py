@@ -88,10 +88,13 @@ def check_uw_authors(paper, uw_authors):
             first = first.split(" ")[0].lower()
         last = unidecode(last).lower()
 
-        if last in uw_authors and first in uw_authors[last]:
-            if i == 0:
-                first_author = True
-            total_uw += 1
+        if last in uw_authors:
+            for option in uw_authors[last]:
+                if (len(option) > 1 and first[:len(option)] == option) or first == option:
+                    if i == 0:
+                        first_author = True
+                    total_uw += 1
+                    break
     return first_author, total_uw
 
 
@@ -192,10 +195,16 @@ def bold_uw_authors(author_string, uw_authors=None):
 
         # NOTE: The assumption here is that if there's only an initial, then that needs to match, otherwise
         # the entire first name needs to match (case insensitive)
-        if last in uw_authors and first in uw_authors[last]:
-            # add asterisks for bold in mrkdwn
-            authors += f"*{' '.join(split_author)}*, "
-        else:
+        matched = False
+        if last in uw_authors:
+            for option in uw_authors[last]:
+                if (len(option) > 1 and first[:len(option)] == option) or first == option:        
+                    # add asterisks for bold in mrkdwn
+                    matched = True
+                    authors += f"*{' '.join(split_author)}*, "
+                    break
+        
+        if not matched:
             authors += f"{' '.join(split_author)}, "
 
     # add final underscore so the whole thing is italic
