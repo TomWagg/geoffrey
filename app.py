@@ -836,13 +836,23 @@ def any_new_publications():
         else:
             author_id_string = ", ".join(user_id_strings[:-1]) + " and " + user_id_strings[-1]
 
+        author_string = ""
+        if len(paper["authors"]) == 1:
+            author_string = paper["authors"][0].split(', ')[0]
+        elif len(paper["authors"]) == 2:
+            author_string = paper["authors"][0].split(', ')[0] + " & " + paper["authors"][1].split(', ')[0]
+        elif len(paper["authors"]) == 3:
+            author_string = paper["authors"][0].split(', ')[0] + ", " + paper["authors"][1].split(', ')[0] + " & " + paper["authors"][2].split(', ')[0]
+        else:
+            author_string = paper["authors"][0].split(', ')[0] + " et al."
+
         new_block = {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
                 "text": (f"<{paper['link']}|*{sanitise_tags(paper['title'])}*>" + "\n"
-                            f"\t_{paper['authors'][0].split(' ')[0]} "
-                            f"et al. ({paper['date'].year})_ - including UW authors {author_id_string}")
+                         f"\t_{author_string} ({paper['date'].year})_ "
+                         f"- including UW authors {author_id_string}")
             }
         }
         if check_uw_authors(paper, uw_authors)[0]:
