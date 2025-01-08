@@ -10,12 +10,12 @@ import pandas as pd
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from ads_query import bold_uw_authors, get_ads_papers, save_papers, get_uw_authors
+from ads_query import bold_uw_authors, get_ads_papers, save_papers, get_uw_authors, check_uw_authors
 
 # Initializes your app with your bot token and socket mode handler
 app = App(token=os.environ.get("GEOFFREY_BOT_TOKEN"))
 BOT_ID = "U06V23JH71R"
-PAPERS_CHANNEL = "department-arxiv"
+PAPERS_CHANNEL = "geoffrey-testing"
 
 """ ---------- APP HOME ---------- """
 @app.event("app_home_opened")
@@ -716,17 +716,22 @@ def get_orcid_from_id(user_id):
 
 
 def any_new_publications():
-    """ Check whether any new publications by grad students are out in the past week """
+    """ Check whether any new publications came out in the past week """
+    print("Starting paper search!")
     no_new_papers = True
 
     initial_announcement = False
 
-    # find the user ID of the person
+    # find the user ID of all UW authors
     uw_authors = get_uw_authors()
 
-    # go through the file of grads
+    # go through the file of people in the department
     orcid_file = pd.read_csv("data/orcids.csv")
+    papers = []
+    no_new_papers = False
+
     for i, row in orcid_file.iterrows():
+        break
         query = f'orcid:{row["orcid"]}'
 
         # get the papers from the last week
@@ -738,6 +743,9 @@ def any_new_publications():
 
         # if this person has one then announce it!
         if len(weekly_papers) > 0:
+            papers += weekly_papers
+            no_new_papers = False
+            continue
             save_papers(weekly_papers)
             no_new_papers = False
 
@@ -754,8 +762,151 @@ def any_new_publications():
 
     if no_new_papers:
         print("No new papers!")
-    else:
-        print("All done with the paper search!")
+        return
+
+    print("All done with the paper search!")
+    print(papers)
+    
+    papers = [{'link': 'https://ui.adsabs.harvard.edu/abs/2025ApJ...978...76Z/abstract', 'title': 'Microlensing Events in Five Years of Photometry from the Zwicky Transient Facility', 'abstract': 'Microlensing has a unique advantage for detecting dark objects in the Milky Way, such as free-floating planets, neutron stars, and stellar-mass black holes. Most microlensing surveys focus on the Galactic bulge, where higher stellar density leads to a higher event rate. However, microlensing events in the Galactic plane have closer lenses and longer timescales, which leads to a greater chance of measuring microlens parallax, providing an additional constraint on the mass of the lens. This work searches for microlensing events in Zwicky Transient Facility (ZTF) Data Release 17 from 2018 to 2023 in the Galactic plane region. We find 124 high-confidence microlensing events and 54 possible events, all available online (see footnote 11). Thus, with 2 yr of additional ZTF data in DR17, we have more than doubled the number of microlensing events (60) found in the previous 3 yr DR5 search. In the event selection, we use the efficient EventFinder algorithm to detect microlensing signals, which could be used for large data sets such as future ZTF data releases or data from the Rubin Observatory Legacy Survey of Space and Time. Using detection efficiencies of ZTF fields obtained from catalog-level simulations, we calculate the mean Einstein timescale to be &lt;t <SUB>E</SUB>&gt; = 51.7 ± 3.3 days, smaller than previous results of the Galactic plane but within 1.5σ. We also calculate optical depths and event rates, although some caution is needed due to the use of visual inspection when creating our final sample. Spectroscopy of three possible candidates confirms their microlensing nature.', 'authors': ['Zhai, Ruocheng', 'Rodriguez, Antonio C.', 'Mao, Shude', 'Lam, Casey Y.', 'Bellm, Eric C.', 'Purdum, Josiah', 'Masci, Frank J.', 'Wold, Avery'], 'date': datetime.date(2025, 1, 1), 'citations': 2, 'reads': 162, 'keywords': ['Milky Way disk', 'Gravitational microlensing', '1050', '672', 'Astrophysics - Astrophysics of Galaxies', 'Astrophysics - Instrumentation and Methods for Astrophysics', 'Astrophysics - Solar and Stellar Astrophysics'], 'publisher': 'The Astrophysical Journal'},
+    {'link': 'https://ui.adsabs.harvard.edu/abs/2024ApJ...977..262C/abstract', 'title': 'Expanding the Ultracompacts: Gravitational-wave-driven Mass Transfer in the Shortest-period Binaries with Accretion Disks', 'abstract': 'We report the discovery of three ultracompact binary white dwarf systems hosting accretion disks, with orbital periods of 7.95, 8.68, and 13.15 minutes. This significantly augments the population of mass-transferring binaries at the shortest periods, and provides the first evidence that accretors in ultracompacts can be dense enough to host accretion disks even below 10 minutes (where previously only direct-impact accretors were known). In the two shortest-period systems, we measured changes in the orbital periods driven by the combined effect of gravitational-wave emission and mass transfer. We find <inline-formula> </inline-formula> is negative in one case, and positive in the other. This is only the second system measured with a positive <inline-formula> </inline-formula>, and it is the most compact binary known that has survived a period minimum. Using these systems as examples, we show how the measurement of <inline-formula> </inline-formula> is a powerful tool in constraining the physical properties of binaries, e.g., the mass and mass–radius relation of the donor stars. We find that the chirp masses of ultracompact binaries at these periods seem to cluster around <inline-formula> </inline-formula>, perhaps suggesting a common origin for these systems or a selection bias in electromagnetic discoveries. Our new systems are among the highest-amplitude known gravitational-wave sources in the millihertz regime, providing an exquisite opportunity for multimessenger study with future space-based observatories such as LISA and TianQin. We discuss how such systems provide fascinating laboratories to study the unique regime where the accretion process is mediated by gravitational waves.', 'authors': ['Chakraborty, Joheen', 'Burdge, Kevin B.', 'Rappaport, Saul A.', 'Munday, James', 'Chen, Hai-Liang', 'Rodríguez-Gil, Pablo', 'Dhillon, V. S.', 'Hughes, Scott A.', 'Nelemans, Gijs', 'Kara, Erin', 'Bellm, Eric C.', 'Brown, Alex J.', 'Castro Segura, Noel', 'Chen, Tracy X.', 'Chickles, Emma', 'Dyer, Martin J.', 'Dekany, Richard', 'Drake, Andrew J.', 'Garbutt, James', 'Graham, Matthew J.', 'Green, Matthew J.', 'Jarvis, Dan', 'Kennedy, Mark R.', 'Kerry, Paul', 'Kulkarni, S. R.', 'Littlefair, Stuart P.', 'Mahabal, Ashish A.', 'Masci, Frank J.', 'McCormac, James', 'Parsons, Steven G.', 'Pelisoli, Ingrid', 'Pike, Eleanor', 'Prince, Thomas A.', 'Riddle, Reed', 'van Roestel, Jan', 'Sahman, Dave', 'Wold, Avery', 'Sunny Wong, Tin Long'], 'date': datetime.date(2024, 12, 1), 'citations': 2, 'reads': 580, 'keywords': ['Compact binary stars', 'Gravitational wave sources', 'Stellar accretion disks', 'White dwarf stars', '283', '677', '1579', '1799', 'Astrophysics - High Energy Astrophysical Phenomena', 'Astrophysics - Solar and Stellar Astrophysics'], 'publisher': 'The Astrophysical Journal'},
+    {'link': 'https://ui.adsabs.harvard.edu/abs/2025ApJS..276....8G/abstract', 'title': 'The Local Ultraviolet to Infrared Treasury. I. Survey Overview of the Broadband Imaging', 'abstract': 'The Local Ultraviolet to Infrared Treasury (LUVIT) is a Hubble Space Telescope program that combines newly acquired data in the near-ultraviolet (NUV), optical, and near-infrared (NIR) with archival optical and NIR imaging to produce multiband panchromatic resolved stellar catalogs for 23 pointings in 22 low-mass, star-forming galaxies ranging in distance from the outskirts of the Local Group to ∼3.8 Mpc. We describe the survey design, detail the LUVIT broadband filter observations and the archival data sets included in the LUVIT reductions, and summarize the simultaneous multiband data reduction steps. The spatial distributions and color–magnitude diagrams (CMDs) from the resulting stellar catalogs are presented for each target, from the NUV to the NIR. We demonstrate in which regions of the CMDs stars with NUV and optical, optical and NIR, and NUV through NIR detections reside. For each target, we use the results from artificial star tests to measure representative completeness, bias, and total photometric uncertainty as a function of magnitude in each broadband filter. We also assess which LUVIT targets have significant spatial variation in the fraction of stars recovered at a given magnitude. The panchromatic LUVIT stellar catalogs will provide a rich legacy data set for a host of resolved stellar population studies.', 'authors': ['Gilbert, Karoline M.', 'Choi, Yumi', 'Boyer, Martha L.', 'Williams, Benjamin F.', 'Weisz, Daniel R.', 'Bell, Eric F.', 'Dalcanton, Julianne J.', 'McQuinn, Kristen B. W.', 'Skillman, Evan D.', 'Costa, Guglielmo', 'Dolphin, Andrew E.', 'Fouesneau, Morgan', 'Girardi, Léo', 'Goldman, Steven R.', 'Gordon, Karl D.', 'Guhathakurta, Puragra', 'Gull, Maude', 'Hagen, Lea', 'Huynh, Ky', 'Lindberg, Christina W.', 'Marigo, Paola', 'Murray, Claire E.', 'Pastorelli, Giada', 'Yanchulova Merica-Jones, Petia'], 'date': datetime.date(2025, 1, 1), 'citations': 0, 'reads': 275, 'keywords': ['Stellar populations', 'Dwarf irregular galaxies', 'Multi-color photometry', '1622', '417', '1077', 'Astrophysics - Astrophysics of Galaxies'], 'publisher': 'The Astrophysical Journal Supplement Series'},
+    {'link': 'https://ui.adsabs.harvard.edu/abs/2024ApJ...977..179G/abstract', 'title': 'Exploring the Diversity of Faint Satellites in the M81 Group', 'abstract': "In the last decade, we have been able to probe further down the galaxy luminosity function than ever before and expand into the regime of ultra-faint dwarfs (UFDs), which are some of the best probes we have of small-scale cosmology and galaxy formation. Digital sky surveys have enabled the discovery and study of these incredibly low-mass, highly dark-matter-dominated systems around the Local Group, but it is critical that we expand the satellite census further out to understand if Milky Way and M31 satellites are representative of dwarf populations in the local Universe. Using data from the Hubble Space Telescope (HST) Advanced Camera for Surveys (ACS), we present updated characterization of four satellite systems in the M81 group. These systems—D1005+68, D1006+69, DWJ0954+6821, and D1009+68—were previously discovered using ground-based Subaru Hyper Suprime-Cam data as overdensities in M81's halo, and are now confirmed with HST/ACS by this work. These are all faint (M <SUB> V </SUB> ≥ ‑7.9) and consistent with old (∼13 Gyr), metal-poor ([M/H] &lt; ‑1.5) populations. Each system possesses relatively unusual features—including one of the most concentrated satellite galaxies with a Sérsic index of n ∼ 5, one of the most elliptical galaxies outside the Local Group with an ϵ ∼ 0.6, and one of the most compact galaxies for its magnitude. Two of the satellites have very low surface brightness, lower than most known galaxies in this absolute magnitude range. This work previews the scientific promise of the upcoming Rubin Observatory and Roman Telescope for illuminating the diversity of UFDs in the Local Volume and beyond.", 'authors': ['Gozman, Katya', 'Bell, Eric F.', 'Jang, In Sung', 'Arias, Jose Marco', 'Bailin, Jeremy', 'de Jong, Roelof S.', "D'Souza, Richard", 'Gnedin, Oleg Y.', 'Monachesi, Antonela', 'Price, Paul A.', 'Rao, Vaishnav V.', 'Smercina, Adam'], 'date': datetime.date(2024, 12, 1), 'citations': 0, 'reads': 398, 'keywords': ['Dwarf galaxies', 'Low surface brightness galaxies', 'Galaxies', 'HST photometry', 'Hubble Space Telescope', 'RGB photometry', '416', '940', '573', '756', '761', '1397', 'Astrophysics - Astrophysics of Galaxies'], 'publisher': 'The Astrophysical Journal'},
+    {'link': 'https://ui.adsabs.harvard.edu/abs/2024RNAAS...8..303N/abstract', 'title': 'Mock JWST Colors of Two Different Star Formation Histories at z ~ 4', 'abstract': 'In this work, we test if JWST NIRCam filters can distinguish between two different galaxy star formation histories (SFHs) at z = 3–4. We use the Code Investigating GALaxy Emission to model F150W, F277W, and F770W-band magnitudes for mock massive galaxies at 3.5 &lt; z &lt; 4.5 generating two different SFHs: (1) a delayed-τ, analogous to a starburst-like galaxy with a mostly uniform stellar population, and (2) a decayed exponential with a late burst to represent a more even mixture of old and young stellar populations. We explored the F277W ‑ F770W versus F150W ‑ F277W color space, and determined that the delayed-τ SFH produces highly clustered, relatively "flat" colors in both planes; whereas the other SFH produces more diversity across this color space. This work motivates further studies on the potential for JWST colors to rapidly identify varying evolutionary pathways for galaxies at z = 3–4.', 'authors': ['Nere, Rachel', 'Long, Arianna S.'], 'date': datetime.date(2024, 12, 1), 'citations': 0, 'reads': 0, 'keywords': ['Galaxy colors', 'Two-color diagrams', 'Starburst galaxies', '586', '1724', '1570'], 'publisher': 'Research Notes of the American Astronomical Society'},
+    {'link': 'https://www.tomwagg.com', 'title': "Invented test paper", 'abstract': 'This is a test paper that I made up for testing purposes', 'authors': ['Wagg, Tom'], 'date': datetime.date(2024, 12, 1), 'citations': 0, 'reads': 0, 'keywords': ['Test paper'], 'publisher': 'Tom Wagg'}
+    ]
+
+
+    start_blocks = [
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": f":telescope: Geoffrey's Weekly Paper Roundup ({datetime.date.today()})"
+            }
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": np.random.choice([
+                    "Wow what a week huh :sweat_smile: Let's take some time away from our toils to appreciate the hard work of our colleagues!",
+                    "Not to fear, Geoffrey is here! I've got exactly what you need to satisfy the yearning in your soul - new papers! :rolled_up_newspaper:",
+                    "Goodness what a delightful time I've had perusing ADS this week - check out these tremendous papers! :tada:",
+                    "What better way to start the day than to see your colleagues' fascinating new work? :sunrise:",
+                    "Oh my, we've got a real treat for you today - some splendid new papers from our colleagues! :tada:",
+                    "What have we here? Perchance an opportunity for someone to tell us more about this in a Roundup talk (hint hint)? :eyes:",
+                ])
+            }
+        },
+    ]
+
+    first_author_blocks = [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"*First Author Papers*"
+            }
+        },
+		{
+			"type": "divider"
+		},
+    ]
+
+    co_author_blocks = [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"*Co-Author Papers*"
+            }
+        },
+		{
+			"type": "divider"
+		},
+    ]
+
+    thread_msgs = []
+
+    for paper in papers:
+        user_id_strings = [f"<@{user_id}>" for user_id in get_author_ids(orcid_file, paper["authors"], uw_authors)]
+        # join user ids with commas and an "and" at the end
+        if len(user_id_strings) == 1:
+            author_id_string = user_id_strings[0]
+        else:
+            author_id_string = ", ".join(user_id_strings[:-1]) + " and " + user_id_strings[-1]
+
+        new_block = {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": (f"<{paper['link']}|*{sanitise_tags(paper['title'])}*>" + "\n"
+                            f"\t_{paper['authors'][0].split(' ')[0]} "
+                            f"et al. ({paper['date'].year})_ - including UW authors {author_id_string}")
+            }
+        }
+        if check_uw_authors(paper, uw_authors)[0]:
+            first_author_blocks.append(new_block)
+        else:
+            co_author_blocks.append(new_block)
+
+
+        # shorten long titles
+        title = sanitise_tags(paper["title"])
+        if len(title) > 150:
+            title = title[:147] + "..."
+
+        # add the same starting blocks for all
+        title_block = [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text":f"{title}",
+                }
+            },
+        ]
+        content_block = [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": bold_uw_authors(paper["authors"])
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"<{paper['link']}|*ADS Link*>"
+                }
+            }
+        ]
+
+        # create blocks for each abstract
+        abstract_block = [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": paper['abstract']
+                }
+            }
+        ]
+
+        # combine all of the blocks
+        thread_msgs.append(title_block + content_block + abstract_block)
+
+    blocks = start_blocks + first_author_blocks + co_author_blocks
+
+    channel = find_channel(PAPERS_CHANNEL)
+    message = app.client.chat_postMessage(text="Congrats on your new paper!",
+                                          blocks=blocks, channel=channel, unfurl_links=False)
+    
+    # reply in thread with the abstracts
+    for abstract_blocks in thread_msgs:
+        app.client.chat_postMessage(text="Your paper details:", blocks=abstract_blocks,
+                                    channel=channel, thread_ts=message["ts"], unfurl_links=False)
 
 
 def get_author_ids(orcids, authors, uw_authors):
@@ -768,124 +919,26 @@ def get_author_ids(orcids, authors, uw_authors):
         split_author = list(reversed(author.split(", ")))
 
         # get their first initial and last name
-        first_initial, last_name = split_author[0][0].lower(), split_author[-1].lower()
+        first_name, last_name = split_author[0].split(" ")[0].lower(), split_author[-1].lower()
+        first_initial = first_name[0]
 
-        # NOTE: I assume if first initial and last name match then it is the right person
-        if last_name in uw_authors and first_initial in uw_authors[last_name]:
-            
+        # NOTE: It matches either on the full first name or just first initial if the first name is just an initial
+        if last_name in uw_authors:
+            if len(first_name) == 2 and first_name[1] == '.':
+                first_name = first_name[0]
+            found_one = False
+            for option in uw_authors[last_name]:
+                if (len(option) > 1 and option == first_name[:len(option)]) or option == first_name:
+                    found_one = True
+
+            if not found_one:
+                continue
+
             # find row in the table that matches
             matched_id = orcids[(orcids["first_initial"] == first_initial) & (orcids["last_name_lower"] == last_name)]
             if len(matched_id) > 0:
                 author_ids.append(matched_id["slack_id"].values[0])
     return author_ids
-
-
-def announce_publication(user_ids, paper):
-    """Announce to the workspace that someone has published a new paper(s)
-
-    Parameters
-    ----------
-    user_id : `str`
-        Slack user ID of the people who published the paper
-    papers : `dict`
-        Dictionaries of the paper
-    """
-
-    # choose an random adjective
-    adjective = np.random.choice(["Splendid", "Tremendous", "Brilliant",
-                                  "Excellent", "Fantastic", "Spectacular"])
-    
-    user_id_strings = [f"<@{user_id}>" for user_id in user_ids]
-    # join user ids with commas and an "and" at the end
-    if len(user_id_strings) == 1:
-        author_id_string = user_id_strings[0]
-    else:
-        author_id_string = ", ".join(user_id_strings[:-1]) + " and " + user_id_strings[-1]
-
-    preface = f"Look what I found! :tada: {adjective} work from {author_id_string} :clap:"
-    outro = ("I put the abstract in the thread for anyone interested in learning more "
-                f"- again, a big congratulations to {author_id_string} for this awesome paper")
-
-    # shorten long titles
-    title = sanitise_tags(paper["title"])
-    if len(title) > 150:
-        title = title[:147] + "..."
-
-    # add the same starting blocks for all
-    start_blocks = [
-        {
-            "type": "header",
-            "text": {
-                "type": "plain_text",
-                "text":f"{title}",
-            }
-        },
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": preface
-            }
-        },
-    ]
-
-    # add some blocks for each paper
-    paper_blocks = [
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": bold_uw_authors(paper["authors"])
-            }
-        },
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": f"<{paper['link']}|*ADS Link*>"
-            }
-        }
-    ]
-
-    # add a single end block about the abstract
-    end_blocks = [
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": outro
-            }
-        }
-    ]
-
-    # combine all of the blocks
-    blocks = start_blocks + paper_blocks + end_blocks
-
-    # create blocks for each abstract
-    abstract_blocks = [
-        [
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": p['abstract']
-                }
-            }
-        ] for p in [paper]
-    ]
-
-    # flatten out the blocks into the right format
-    blocks = list(np.ravel(blocks))
-    abstract_blocks = list(np.ravel(abstract_blocks))
-
-    # find the channel and send the initial message
-    channel = find_channel(PAPERS_CHANNEL)
-    message = app.client.chat_postMessage(text="Congrats on your new paper!",
-                                          blocks=blocks, channel=channel, unfurl_links=False)
-
-    # reply in thread with the abstracts
-    app.client.chat_postMessage(text="Your paper abstract:", blocks=abstract_blocks,
-                                channel=channel, thread_ts=message["ts"])
 
 
 """ ---------- HELPER FUNCTIONS ---------- """
