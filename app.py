@@ -737,7 +737,7 @@ def any_new_publications():
         if weekly_papers is None:
             continue
 
-        # if this person has one then announce it!
+        # add this to the list of papers to announce
         if len(weekly_papers) > 0:
             papers += weekly_papers
             no_new_papers = False
@@ -747,6 +747,7 @@ def any_new_publications():
         return
 
     print("All done with the paper search!")
+    save_papers(papers)
 
     start_blocks = [
         {
