@@ -124,20 +124,23 @@ def save_papers(papers_dict_list):
     """
     uw_authors = get_uw_authors()
 
+    for i in range(len(papers_dict_list)):
+        papers_dict_list[i]["first_author"] = papers_dict_list[i]["authors"][0]
+
     # create a dictionary of the data    
     df_dict = {key: [i[key] for i in papers_dict_list]
-               for key in ['title','authors','date','publisher','keywords','link','citations','abstract']}
+               for key in ['title','first_author','authors','date','publisher','keywords','link','abstract']}
 
     # initialize the first author and total UW authors
-    first_author = np.repeat(False, len(papers_dict_list))
+    uw_first_author = np.repeat(False, len(papers_dict_list))
     total_uw = np.zeros(len(papers_dict_list)).astype(int)
 
     # go through each paper and check UW authors
     for i, paper in enumerate(papers_dict_list):
-        first_author[i], total_uw[i] = check_uw_authors(paper, uw_authors)
+        uw_first_author[i], total_uw[i] = check_uw_authors(paper, uw_authors)
 
     # add the first author and total UW authors to the dictionary
-    df_dict['first_author'] = first_author
+    df_dict['uw_first_author'] = uw_first_author
     df_dict['total_uw'] = total_uw
 
     # read in the current papers and add the new ones
