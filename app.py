@@ -10,7 +10,7 @@ import pandas as pd
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from ads_query import bold_uw_authors, get_ads_papers, save_papers, get_uw_authors
+from ads_query import bold_uw_authors, get_ads_papers, save_papers, get_uw_authors, check_uw_authors
 
 # Initializes your app with your bot token and socket mode handler
 app = App(token=os.environ.get("GEOFFREY_BOT_TOKEN"))
@@ -716,16 +716,17 @@ def get_orcid_from_id(user_id):
 
 
 def any_new_publications():
-    """ Check whether any new publications by grad students are out in the past week """
+    """ Check whether any new publications came out in the past week """
+    print("Starting paper search!")
     no_new_papers = True
 
-    initial_announcement = False
-
-    # find the user ID of the person
+    # find the user ID of all UW authors
     uw_authors = get_uw_authors()
 
-    # go through the file of grads
+    # go through the file of people in the department
     orcid_file = pd.read_csv("data/orcids.csv")
+    papers = []
+
     for i, row in orcid_file.iterrows():
         query = f'orcid:{row["orcid"]}'
 
@@ -736,26 +737,159 @@ def any_new_publications():
         if weekly_papers is None:
             continue
 
-        # if this person has one then announce it!
+        # add this to the list of papers to announce
         if len(weekly_papers) > 0:
-            save_papers(weekly_papers)
+            papers += weekly_papers
             no_new_papers = False
-
-            # if Geoffrey hasn't announced that he's looking at papers yet
-            if not initial_announcement:
-                # send an announcement and remember to not do that next time
-                app.client.chat_postMessage(text=("It's time for our weekly paper round up, let's see "
-                                                    "what everyone's been publishing in this last week!"),
-                                            channel=find_channel(PAPERS_CHANNEL))
-                initial_announcement = True
-
-            for paper in weekly_papers:
-                announce_publication(get_author_ids(orcid_file, paper["authors"], uw_authors), paper)
 
     if no_new_papers:
         print("No new papers!")
-    else:
-        print("All done with the paper search!")
+        return
+
+    print("All done with the paper search!")
+    save_papers(papers)
+
+    start_blocks = [
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": f":telescope: Geoffrey's Weekly Paper Roundup ({datetime.date.today()})"
+            }
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": np.random.choice([
+                    "Wow what a week huh :sweat_smile: Let's take some time away from our toils to appreciate the hard work of our colleagues!",
+                    "Not to fear, Geoffrey is here! I've got exactly what you need to satisfy the yearning in your soul - new papers! :rolled_up_newspaper:",
+                    "Goodness what a delightful time I've had perusing ADS this week - check out these tremendous papers! :tada:",
+                    "What better way to start the day than to see your colleagues' fascinating new work? :sunrise:",
+                    "Oh my, we've got a real treat for you today - some splendid new papers from our colleagues! :tada:",
+                    "What have we here? Perchance an opportunity for someone to tell us more about this in a Roundup talk (hint hint)? :eyes:",
+                ])
+            }
+        },
+    ]
+
+    first_author_blocks = [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"*First Author Papers*"
+            }
+        },
+		{
+			"type": "divider"
+		},
+    ]
+
+    co_author_blocks = [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"*Co-Author Papers*"
+            }
+        },
+		{
+			"type": "divider"
+		},
+    ]
+
+    thread_msgs = []
+
+    for paper in papers:
+        user_id_strings = [f"<@{user_id}>" for user_id in get_author_ids(orcid_file, paper["authors"], uw_authors)]
+        # join user ids with commas and an "and" at the end
+        if len(user_id_strings) == 1:
+            author_id_string = user_id_strings[0]
+        else:
+            author_id_string = ", ".join(user_id_strings[:-1]) + " and " + user_id_strings[-1]
+
+        author_string = ""
+        if len(paper["authors"]) == 1:
+            author_string = paper["authors"][0].split(', ')[0]
+        elif len(paper["authors"]) == 2:
+            author_string = paper["authors"][0].split(', ')[0] + " & " + paper["authors"][1].split(', ')[0]
+        elif len(paper["authors"]) == 3:
+            author_string = paper["authors"][0].split(', ')[0] + ", " + paper["authors"][1].split(', ')[0] + " & " + paper["authors"][2].split(', ')[0]
+        else:
+            author_string = paper["authors"][0].split(', ')[0] + " et al."
+
+        new_block = {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": (f"<{paper['link']}|*{sanitise_tags(paper['title'])}*>" + "\n"
+                         f"\t_{author_string} ({paper['date'].year})_ "
+                         f"- including UW authors {author_id_string}")
+            }
+        }
+        if check_uw_authors(paper, uw_authors)[0]:
+            first_author_blocks.append(new_block)
+        else:
+            co_author_blocks.append(new_block)
+
+
+        # shorten long titles
+        title = sanitise_tags(paper["title"])
+        if len(title) > 150:
+            title = title[:147] + "..."
+
+        # add the same starting blocks for all
+        title_block = [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text":f"{title}",
+                }
+            },
+        ]
+        content_block = [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": bold_uw_authors(paper["authors"])
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"<{paper['link']}|*ADS Link*>"
+                }
+            }
+        ]
+
+        # create blocks for each abstract
+        abstract_block = [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": paper['abstract']
+                }
+            }
+        ]
+
+        # combine all of the blocks
+        thread_msgs.append(title_block + content_block + abstract_block)
+
+    blocks = start_blocks + first_author_blocks + co_author_blocks
+
+    channel = find_channel(PAPERS_CHANNEL)
+    message = app.client.chat_postMessage(text="Congrats on your new paper!",
+                                          blocks=blocks, channel=channel, unfurl_links=False)
+    
+    # reply in thread with the abstracts
+    for abstract_blocks in thread_msgs:
+        app.client.chat_postMessage(text="Your paper details:", blocks=abstract_blocks,
+                                    channel=channel, thread_ts=message["ts"], unfurl_links=False)
 
 
 def get_author_ids(orcids, authors, uw_authors):
@@ -768,124 +902,26 @@ def get_author_ids(orcids, authors, uw_authors):
         split_author = list(reversed(author.split(", ")))
 
         # get their first initial and last name
-        first_initial, last_name = split_author[0][0].lower(), split_author[-1].lower()
+        first_name, last_name = split_author[0].split(" ")[0].lower(), split_author[-1].lower()
+        first_initial = first_name[0]
 
-        # NOTE: I assume if first initial and last name match then it is the right person
-        if last_name in uw_authors and first_initial in uw_authors[last_name]:
-            
+        # NOTE: It matches either on the full first name or just first initial if the first name is just an initial
+        if last_name in uw_authors:
+            if len(first_name) == 2 and first_name[1] == '.':
+                first_name = first_name[0]
+            found_one = False
+            for option in uw_authors[last_name]:
+                if (len(option) > 1 and option == first_name[:len(option)]) or option == first_name:
+                    found_one = True
+
+            if not found_one:
+                continue
+
             # find row in the table that matches
             matched_id = orcids[(orcids["first_initial"] == first_initial) & (orcids["last_name_lower"] == last_name)]
             if len(matched_id) > 0:
                 author_ids.append(matched_id["slack_id"].values[0])
     return author_ids
-
-
-def announce_publication(user_ids, paper):
-    """Announce to the workspace that someone has published a new paper(s)
-
-    Parameters
-    ----------
-    user_id : `str`
-        Slack user ID of the people who published the paper
-    papers : `dict`
-        Dictionaries of the paper
-    """
-
-    # choose an random adjective
-    adjective = np.random.choice(["Splendid", "Tremendous", "Brilliant",
-                                  "Excellent", "Fantastic", "Spectacular"])
-    
-    user_id_strings = [f"<@{user_id}>" for user_id in user_ids]
-    # join user ids with commas and an "and" at the end
-    if len(user_id_strings) == 1:
-        author_id_string = user_id_strings[0]
-    else:
-        author_id_string = ", ".join(user_id_strings[:-1]) + " and " + user_id_strings[-1]
-
-    preface = f"Look what I found! :tada: {adjective} work from {author_id_string} :clap:"
-    outro = ("I put the abstract in the thread for anyone interested in learning more "
-                f"- again, a big congratulations to {author_id_string} for this awesome paper")
-
-    # shorten long titles
-    title = sanitise_tags(paper["title"])
-    if len(title) > 150:
-        title = title[:147] + "..."
-
-    # add the same starting blocks for all
-    start_blocks = [
-        {
-            "type": "header",
-            "text": {
-                "type": "plain_text",
-                "text":f"{title}",
-            }
-        },
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": preface
-            }
-        },
-    ]
-
-    # add some blocks for each paper
-    paper_blocks = [
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": bold_uw_authors(paper["authors"])
-            }
-        },
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": f"<{paper['link']}|*ADS Link*>"
-            }
-        }
-    ]
-
-    # add a single end block about the abstract
-    end_blocks = [
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": outro
-            }
-        }
-    ]
-
-    # combine all of the blocks
-    blocks = start_blocks + paper_blocks + end_blocks
-
-    # create blocks for each abstract
-    abstract_blocks = [
-        [
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": p['abstract']
-                }
-            }
-        ] for p in [paper]
-    ]
-
-    # flatten out the blocks into the right format
-    blocks = list(np.ravel(blocks))
-    abstract_blocks = list(np.ravel(abstract_blocks))
-
-    # find the channel and send the initial message
-    channel = find_channel(PAPERS_CHANNEL)
-    message = app.client.chat_postMessage(text="Congrats on your new paper!",
-                                          blocks=blocks, channel=channel, unfurl_links=False)
-
-    # reply in thread with the abstracts
-    app.client.chat_postMessage(text="Your paper abstract:", blocks=abstract_blocks,
-                                channel=channel, thread_ts=message["ts"])
 
 
 """ ---------- HELPER FUNCTIONS ---------- """
