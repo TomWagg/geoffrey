@@ -81,10 +81,14 @@ def check_uw_authors(paper, uw_authors):
         if author.count(",") != 1:
             continue
         last, first = author.split(", ")
-        initial = first[0].lower()
+
+        if len(first) == 2 and first[1] == ".":
+            first = first[0].lower()
+        else:
+            first = first.split(" ")[0].lower()
         last = unidecode(last).lower()
 
-        if last in uw_authors and initial in uw_authors[last]:
+        if last in uw_authors and first in uw_authors[last]:
             if i == 0:
                 first_author = True
             total_uw += 1
@@ -93,10 +97,10 @@ def check_uw_authors(paper, uw_authors):
 
 def filter_known_papers(papers_dict_list):
     papers = pd.read_csv("data/papers.csv")
-    known_papers = papers['title'].values
+    known_papers = [p.lower() for p in papers['title'].values]
     new_papers = []
     for paper in papers_dict_list:
-        if paper['title'] not in known_papers:
+        if paper['title'].lower() not in known_papers:
             new_papers.append(paper)
     return new_papers
 
@@ -106,10 +110,13 @@ def get_uw_authors():
     uw_authors_table = pd.read_csv("data/orcids.csv")
     uw_authors = defaultdict(list)
     for _, row in uw_authors_table.iterrows():
+        uw_authors[row['last_name'].lower()].append(row['first_name'].lower())
         uw_authors[row['last_name'].lower()].append(row['first_name'][0].lower())
 
     # HACK: add David and Chester's alternate names
+    uw_authors["wang"].append("yuankun")
     uw_authors["wang"].append("y")
+    uw_authors["li"].append("zhufo")
     uw_authors["li"].append("z")
     return uw_authors
 
@@ -176,11 +183,16 @@ def bold_uw_authors(author_string, uw_authors=None):
             continue
         split_author = list(reversed(author.split(", ")))
         first, last = split_author
-        initial = first[0].lower()
+
+        if len(first) == 2 and first[1] == ".":
+            first = first[0].lower()
+        else:
+            first = first.split(" ")[0].lower()
         last = unidecode(last).lower()
 
-        # NOTE: I assume if first initial and last name match then it is the right person
-        if last in uw_authors and initial in uw_authors[last]:
+        # NOTE: The assumption here is that if there's only an initial, then that needs to match, otherwise
+        # the entire first name needs to match (case insensitive)
+        if last in uw_authors and first in uw_authors[last]:
             # add asterisks for bold in mrkdwn
             authors += f"*{' '.join(split_author)}*, "
         else:
