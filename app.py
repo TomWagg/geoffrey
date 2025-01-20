@@ -869,12 +869,16 @@ def any_new_publications():
         ]
 
         # create blocks for each abstract
+        abstract = paper['abstract']
+        if len(abstract) > 3000:
+            abstract = abstract[:3000 - 3] + "..."
+
         abstract_block = [
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": paper['abstract']
+                    "text": abstract
                 }
             }
         ]
