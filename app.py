@@ -741,13 +741,13 @@ def any_new_publications():
         if len(weekly_papers) > 0:
             papers += weekly_papers
             no_new_papers = False
+            save_papers(weekly_papers)
 
     if no_new_papers:
         print("No new papers!")
         return
 
     print("All done with the paper search!")
-    save_papers(papers)
 
     start_blocks = [
         {
