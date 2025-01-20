@@ -741,13 +741,13 @@ def any_new_publications():
         if len(weekly_papers) > 0:
             papers += weekly_papers
             no_new_papers = False
+            save_papers(weekly_papers)
 
     if no_new_papers:
         print("No new papers!")
         return
 
     print("All done with the paper search!")
-    save_papers(papers)
 
     start_blocks = [
         {
@@ -804,7 +804,9 @@ def any_new_publications():
     for paper in papers:
         user_id_strings = [f"<@{user_id}>" for user_id in get_author_ids(orcid_file, paper["authors"], uw_authors)]
         # join user ids with commas and an "and" at the end
-        if len(user_id_strings) == 1:
+        if len(user_id_strings) == 0:
+            author_id_string = "ERROR: Couldn't identify UW authors :cry:"
+        elif len(user_id_strings) == 1:
             author_id_string = user_id_strings[0]
         else:
             author_id_string = ", ".join(user_id_strings[:-1]) + " and " + user_id_strings[-1]
@@ -867,12 +869,16 @@ def any_new_publications():
         ]
 
         # create blocks for each abstract
+        abstract = paper['abstract']
+        if len(abstract) > 3000:
+            abstract = abstract[:3000 - 3] + "..."
+
         abstract_block = [
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": paper['abstract']
+                    "text": abstract
                 }
             }
         ]
