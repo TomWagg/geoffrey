@@ -804,7 +804,9 @@ def any_new_publications():
     for paper in papers:
         user_id_strings = [f"<@{user_id}>" for user_id in get_author_ids(orcid_file, paper["authors"], uw_authors)]
         # join user ids with commas and an "and" at the end
-        if len(user_id_strings) == 1:
+        if len(user_id_strings) == 0:
+            author_id_string = "ERROR: Couldn't identify UW authors :cry:"
+        elif len(user_id_strings) == 1:
             author_id_string = user_id_strings[0]
         else:
             author_id_string = ", ".join(user_id_strings[:-1]) + " and " + user_id_strings[-1]
